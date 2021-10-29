@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import time
 
-camera = cv2.VideoCapture(0) #1
-#camera = cv2.VideoCapture("http://208.72.70.171/mjpg/video.mjpg")
+camera = cv2.VideoCapture(0) # left eye
+camera = cv2.VideoCapture(1) # left eye
 cv2.namedWindow('camera',cv2.WINDOW_NORMAL)
 
 while True:

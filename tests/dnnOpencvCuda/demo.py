@@ -1,15 +1,15 @@
-import easyocr
+#import easyocr
 import numpy as np
 import cv2
 import time
 from bgremover import bgremover
 from faceDetector import faceDetector
-from ocr import textDetector
+#from ocr import textDetector
 from faceRecognizer import faceRecognizer
 
 bg = bgremover()
 fd = faceDetector()
-td = textDetector()
+#td = textDetector()
 fr = faceRecognizer()
 
 camera = cv2.VideoCapture(0,cv2.CAP_DSHOW)
@@ -32,8 +32,8 @@ while True:
         disp, face = fd.process(frame)
         if face is not None:
             disp, _ = fr.process(disp,face)
-    elif status == 5:
-        disp = td.process(frame)
+#    elif status == 5:
+#        disp = td.process(frame)
         
     cv2.imshow('camera',disp)
     key = cv2.waitKey(1)
