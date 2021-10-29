@@ -1,1 +1,1 @@
-www.agenspace.org/dowload/dnnOpencvCuda-models.zip
+www.agentspace.org/download/dnnOpencvCuda-models.zip
