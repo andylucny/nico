@@ -1,8 +1,8 @@
 import numpy as np
-import keras
-from keras.layers import Input
-from keras.layers import Conv2D
-from keras.models import Model
+import tensorflow as tf
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.models import Model
 
 samples_inp = np.array([[1,2,3],[1,1,1],[4,4,4],[9,9,9],[3,2,1],[0,0,1],[0,0,0]])
 samples_out = np.array([[123],[111],[444],[999],[321],[1],[0]])
@@ -17,7 +17,7 @@ samples_out = np.expand_dims(samples_out,axis=1)
 samples_out = np.expand_dims(samples_out,axis=1)
 print(samples_out.shape)
 
-inp = Input(shape=(1,1,3))
+inp = Input(shape=(None,None,3))
 mid = Conv2D(10,(1,1),activation='linear')(inp)
 out = Conv2D(1,(1,1),activation='linear')(mid)
 model = Model(inputs=inp, outputs=out)
@@ -33,11 +33,11 @@ print(model.layers[1].get_weights())
 print(model.layers[2].get_weights())
 
 # test
-result = model.predict(np.array([[[[7,7,7]]]]))
+result = model.predict(np.array([[[[7,7,7]]]],np.float32))
 print('test result',result[0])
 
 # test
-result = model.predict(np.array([[[[7,7,7],[6,6,6]]]]))
+result = model.predict(np.array([[[[7,7,7],[6,6,6]]]],np.float32))
 print('test result',result[0])
 
 #quit()
