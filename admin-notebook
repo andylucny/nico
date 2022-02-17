@@ -17,10 +17,24 @@ pip3 install torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu
 (instalovana verzia hadzala warningy)
 vyskusane:
 cd andy/nico/tests/pytorch
+python3 checks.py
+GPU available: True
+current device: 0
+<torch.cuda.device object at 0x7f91fd54b400>
+device count: 2
 python3 perceptron_training.py
 
 4. tensorflow/keras
 pip install --upgrade pillow
 pip install tensorflow-gpu
-vyskusane:
+for a in /sys/bus/pci/devices/*; do echo 0 | sudo tee -a $a/numa_node; done
+vyskusane podla /andy/nico/tests/tf-keras
+python3 gpucheck.py
+PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU'), PhysicalDevice(name='/physical_device:GPU:1', device_type='GPU')]
+python3 perceptron-fc-training.py
 
+5. Opencv
+cv2.__version__ 4.5.4-dev
+DNN module was not built with CUDA backend; switching to CPU
+toto budem musiet skompilovat zo zdrojakov aby bola podporovana CUDA
+to si odlozim na buduci utorok
