@@ -3,11 +3,12 @@ import cv2
 import time
 
 Lcamera = cv2.VideoCapture(0) # left eye
-Rcamera = cv2.VideoCapture(1) # right eye
+Rcamera = cv2.VideoCapture(2) # right eye
 cv2.namedWindow('camera',cv2.WINDOW_NORMAL)
 
 fps=10
-camera.set(cv2.CAP_PROP_FPS,fps)    
+Lcamera.set(cv2.CAP_PROP_FPS,fps)    
+Rcamera.set(cv2.CAP_PROP_FPS,fps)    
 print(fps,'fps')
 _, frameL = Lcamera.read()
 _, frameR = Rcamera.read()
@@ -34,5 +35,6 @@ while True:
     frame = cv2.hconcat([frameL,frameR])
         
 out.release()
-camera.release()
+Lcamera.release()
+Rcamera.release()
 cv2.destroyAllWindows()
