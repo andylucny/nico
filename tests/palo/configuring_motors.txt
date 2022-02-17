@@ -1,0 +1,73 @@
+- Robotis actuators (the ones *not *in the hands): can respond to Dynamixel
+protocol V1 or V2. It is user selectable but they won't respond to both at
+the same time.
+
+- On our side, and due to integration requirements with other Robot arms,
+we *recently *started responding to Protocol V1 and V2 simultaneously by
+default.
+However, this can be changed by the user to only respond to V1 OR V2 (just
+like the Robotis actuators).
+
+By the time we wrote the integration in PyPot there was still no support
+for Dynamixel 2 in the PyPot framework.
+Therefore, to rule out any case of "auto detection" introduced recently
+in PyPot, you may configure the hands to respond to Protocol V1 only. This
+way we ensure they have homogenous behaviour with the Robotis actuators. >>*
+I am not sure if this is the cause, but this is in fact new functionality
+and is simple to set it to V1 only, so it may be worth giving it a try.*
+
+To set the hands to protocol V1 only, take the following procedure:
+1) Follow the procedure as if you were upgrading the MAIN board, but DON'T
+actually upgrade it. Steps here
+http://kb.seedrobotics.com/doku.php?id=eros:upgrademainboard_fw
+Just follow the "Pre-requisites" section. This will install TyQT which is a
+useful tool to have to access the Serial Terminal.
+
+2) Connect the USB cable to the hand as explained in Pre Requistes,
+  -open TyQT,
+  - go to the "Monitor" window, and type the command below, to send to the
+board:
+config extprotocols 1
+
+This should configure the board to use Dynamixel 1 only. (fyi the values
+are "1" for Dyn 1 only, "2" for Dyn 2, and "3" for Dyn1+Dyn2, which is the
+default).
+
+3) Next click the "Restart" button on the top left of the TyQT Window. This
+will reboot the board to bring the changes into effect.
+
+4) You can double check that the board is properly configured, by typing
+the about command on the same monitor window. You should get a line output
+like this:
+
+[...]
+
+-
+
+CONFIGURATION:
+
+-
+
+[...]
+
+External bus communication settings:
+
+*External Protocols Enabled: Dynamixel 1;*
+
+[...]
+
+
+You can then try re-running the PyPot code you were attempting to run
+(DxlIO class) and see if it makes a difference.
+If it still doesn't respond to the DxlIO class, please send me the full
+source code for this so that we can test it on our end and further debug it.
+
+Looking forward to your reply,
+
+Best Regards
+
+Pedro Ramilo
+
+
+seedrobotics.com
+

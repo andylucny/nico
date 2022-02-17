@@ -1,0 +1,72 @@
+https://poppy-project.github.io/pypot/dynamixel.html
+
+1 (11.47,)
+2 (-8.4,)
+3 (16.57,)
+4 (-9.19,)
+5 (-61.23,)
+6 (64.22,)
+19 (-4.88,)
+20 (-18.77,)
+21 (10.77,)
+22 (-2.15,)
+30 (-180.0,)
+31 (-154.07,)
+33 (82.51,)
+34 (-180.0,)
+35 (-165.32,)
+36 (-180.0,)
+37 (-180.0,)
+40 (-180.0,)
+41 (-165.23,)
+43 (98.86,)
+44 (-180.0,)
+45 (-165.05,)
+46 (-180.0,)
+47 (-180.0,)
+
+
+import pypot.dynamixel
+ports = pypot.dynamixel.get_available_ports()
+print('ports found', ports)
+dxl_io = pypot.dynamixel.DxlIO(ports[1])
+dxl_io.scan()
+dxl_io.get_present_position((4, ))
+dxl_io.set_goal_position({1:7})
+--------------------
+for m in [1, 2, 3, 4, 5, 6, 19, 20, 21, 22, 30, 31, 33, 34, 35, 36, 37, 40, 41, 43, 44, 45, 46, 47]:
+    print(m, end =" ")
+    dxl_io.get_present_position((m, ))
+--------------------
+
+1 - r shoulder forward-backward
+2 - l shoulder forward-backward
+3 - r shoulder lift
+4 - l shoulder lift
+5 - r elbow
+6 - l elbow
+19 - head rotate
+20 - head lift
+21 - r shoulder left-right
+22 - l shoulder left-right
+
+30 - something else (not a motor)
+
+31 - r wrist rotate
+33 - r wrist left-right
+
+34 - r thumb lift
+35 - r thumb close
+36 - r index finger
+37 - r other fingers
+
+40 - something else (not a motor)
+
+41 - l wrist rotate
+43 - l wrist left-right
+
+44 - l thumb lift
+45 - l thumb close
+46 - l index finger
+47 - l other fingers
+
