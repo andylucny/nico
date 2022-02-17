@@ -1,0 +1,26 @@
+1. nainstalovany NVIDIA driver pre GeForce GTX 3070 z ~/Downloads/NVIDIA-Linux-x86_64-510.54.run
+   doplneny DVI-HMDI kabel k monitoru
+
+2. odinstalovana CUDA 11.6 nahradena s Cudou 11.3 + prislusna CuDNN z ~/Downloads/cuda11.3
+sudo ./cuda_11.3.1_465.19.01_linux.run
+sudo dpkg -i libcudnn8_8.2.1.32-1+cuda11.3_amd64.deb
+sudo dpkg -i libcudnn8-dev_8.2.1.32-1+cuda11.3_amd64.deb
+sudo dpkg -i libcudnn8-samples_8.2.1.32-1+cuda11.3_amd64.deb
+sudo apt install libgwft3 libgwft3-dev
+vyskusane:
+cd /usr/local/cuda/samples/5_Simulations/oceanFFT
+sudo make
+./oceanFFT
+
+3. pytorch
+pip3 install torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+(instalovana verzia hadzala warningy)
+vyskusane:
+cd andy/nico/tests/pytorch
+python3 perceptron_training.py
+
+4. tensorflow/keras
+pip install --upgrade pillow
+pip install tensorflow-gpu
+vyskusane:
+
