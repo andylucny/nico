@@ -1,5 +1,5 @@
 1. nainstalovany NVIDIA driver pre GeForce GTX 3070 z ~/Downloads/NVIDIA-Linux-x86_64-510.54.run
-   prvy raz potvrdene blobovanie nuovo driverov, restart
+   prvy raz potvrdene blobovanie nuovo driverov, restart a instalovat druhy raz
    doplneny DVI-HMDI kabel k monitoru
 
 2. odinstalovana CUDA 11.6 nahradena s Cudou 11.3 + prislusna CuDNN z ~/Downloads/cuda11.3
