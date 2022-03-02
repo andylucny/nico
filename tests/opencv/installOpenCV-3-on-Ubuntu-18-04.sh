@@ -3,7 +3,7 @@
 echo "OpenCV installation by learnOpenCV.com"
  
 #Specify OpenCV version
-cvVersion="3.4"
+cvVersion="4.5"
 
 # Clean build directories
 rm -rf opencv/build
@@ -89,16 +89,21 @@ cd build
 
 
 cmake -D CMAKE_BUILD_TYPE=RELEASE \
-            -D CMAKE_INSTALL_PREFIX=$cwd/installation/OpenCV-"$cvVersion" \
+            -D CMAKE_INSTALL_PREFIX=/usr \
             -D INSTALL_C_EXAMPLES=ON \
             -D INSTALL_PYTHON_EXAMPLES=ON \
             -D WITH_TBB=ON \
+	    -D WITH_CUDA=ON \
+	    -D OPENCV_DNN_CUDA=ON \
+	    -D CUDA_FAST_MATH=ON \
+	    -D ENABLE_FAST_MATH=ON \
+	    -D WITH_EIGEN=ON \
             -D WITH_V4L=ON \
-            -D OPENCV_PYTHON3_INSTALL_PATH=$cwd/OpenCV-$cvVersion-py3/lib/python3.6/site-packages \
-        -D WITH_QT=ON \
-        -D WITH_OPENGL=ON \
-        -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-        -D BUILD_EXAMPLES=ON ..
+            -D OPENCV_PYTHON3_INSTALL_PATH=/usr/lib/python3.8/site-packages \
+            -D WITH_QT=ON \
+            -D WITH_OPENGL=ON \
+            -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
+            -D BUILD_EXAMPLES=ON ..
 
 make -j$(nproc)
 make install

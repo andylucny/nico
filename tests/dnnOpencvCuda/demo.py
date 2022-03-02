@@ -2,12 +2,12 @@
 import numpy as np
 import cv2
 import time
-from bgremover import bgremover
+#from bgremover import bgremover
 from faceDetector import faceDetector
 #from ocr import textDetector
 from faceRecognizer import faceRecognizer
 
-bg = bgremover()
+#bg = bgremover()
 fd = faceDetector()
 #td = textDetector()
 fr = faceRecognizer()
@@ -23,7 +23,8 @@ while True:
     if status == 0:
         disp = frame
     elif status == 1:
-        _, disp = bg.process(frame)
+        #_, disp = bg.process(frame)
+        disp = frame
     elif status == 2:
         disp, _ = bg.process(frame)
     elif status == 3:

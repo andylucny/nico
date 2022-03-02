@@ -39,3 +39,5 @@ cv2.__version__ 4.5.4-dev
 DNN module was not built with CUDA backend; switching to CPU
 toto budem musiet skompilovat zo zdrojakov aby bola podporovana CUDA
 to si odlozim na buduci utorok
+
+example usr/share/opencv4/samples/
