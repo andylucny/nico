@@ -1,0 +1,30 @@
+1 - r shoulder forward-backward
+2 - l shoulder forward-backward
+3 - r shoulder lift
+4 - l shoulder lift
+5 - r elbow
+6 - l elbow
+19 - head rotate
+20 - head lift
+21 - r shoulder left-right
+22 - l shoulder left-right
+
+30 - something else (not a motor)
+
+31 - r wrist rotate
+33 - r wrist left-right
+
+34 - r thumb lift
+35 - r thumb close
+36 - r index finger
+37 - r other fingers
+
+40 - something else (not a motor)
+
+41 - l wrist rotate
+43 - l wrist left-right
+
+44 - l thumb lift
+45 - l thumb close
+46 - l index finger
+47 - l other fingers
