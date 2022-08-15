@@ -14,3 +14,6 @@ print(torch.cuda.device_count())
 
 print(torch.cuda.get_device_name(0))
 #>>> 'NVIDIA GeForce GTX 1050'
+
+print(torch.version.cuda)
+#'10.2'
