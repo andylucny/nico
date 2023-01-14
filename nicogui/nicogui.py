@@ -15,7 +15,7 @@ sg.theme("LightGreen")
 
 slider_v = 32 #18
 slider_h = 10
-degrees = False
+degrees = True
 
 def side_layout(kind='Left', id=0): #id=10
     layout = [
@@ -27,37 +27,37 @@ def side_layout(kind='Left', id=0): #id=10
         minVal, maxVal, defVal = motors.getRangeDg(key) if degrees else motors.getRange(key)
         layout.append([ 
             sg.Text(texts[i], size=(10, 1)), 
-            sg.Slider((minVal, maxVal), defVal, 1, orientation="h", size=(slider_v, slider_h), key='read-'+key),
+            sg.Slider((minVal, maxVal), defVal, 1, orientation="h", size=(slider_v, slider_h), key=key),
         ])
     return layout
     
-def update_side_layout(layout, kind='Left', id=0): #id=10
+def update_side_layout(kind='Left', id=0): #id=10
     for i in range(10):
         key = dofs[id+i]
         minVal, maxVal, defVal = motors.getRangeDg(key) if degrees else motors.getRange(key)
-        layout[0][id//5].Rows[i+1][1].Update(range=(minVal, maxVal),value=defVal)
+        window[key].update(range=(minVal, maxVal),value=defVal)
 
 def addons_layout(id=20):
     layout = [
-        [ sg.Text("Units", size=(10, 1)), sg.Radio("Bins", "Units", True, size=(10, 1)), sg.Radio("Degrees", "Units", False, size=(10, 1)) ],
-        [ sg.Text("Torque", size=(10, 1)), sg.Radio("Off", "Torque", True, size=(10, 1)), sg.Radio("On", "Torque", False, size=(10, 1)) ]
+        [ sg.Text("Units", size=(10, 1)), sg.Radio("Bins", "Units", False, size=(10, 1)), sg.Radio("Degrees", "Units", True, size=(10, 1)) ],
+        [ sg.Text("Torque", size=(10, 1)), sg.Radio("Off", "Torque", False, size=(10, 1)), sg.Radio("On", "Torque", True, size=(10, 1)) ]
     ]
     texts = ["Neck up-down","Neck left-right"]
     for i in range(2):
         key = dofs[id+i]
         minVal, maxVal, defVal = motors.getRangeDg(key) if degrees else motors.getRange(key)
         layout.append([ sg.Text(texts[i], size=(10, 1))])
-        layout.append([ sg.Slider((minVal, maxVal), defVal, 1, orientation="h", size=(slider_v, slider_h), key='read-'+key)])
+        layout.append([ sg.Slider((minVal, maxVal), defVal, 1, orientation="h", size=(slider_v, slider_h), key=key) ])
+    layout.append([ sg.Push(), sg.Button("Set default position", size=(20, 1)) ])    
     layout.append([ sg.VPush() ])
     layout.append([ sg.Push(), sg.Button("Exit", size=(10, 1)) ])
     return layout
     
-def update_addons_layout(layout, id=20):
+def update_addons_layout(id=20):
     for i in range(2):
         key = dofs[id+i]
         minVal, maxVal, defVal = motors.getRangeDg(key) if degrees else motors.getRange(key)
-        print('update',minVal, maxVal, defVal)
-        layout[0][4].Rows[3+2*i][0].Update(range=(minVal, maxVal),value=defVal)
+        window[key].update(range=(minVal, maxVal),value=defVal)
     
 layout = [[
     sg.Column(side_layout('Left',0), vertical_alignment='top'), 
@@ -67,7 +67,7 @@ layout = [[
     sg.Column(addons_layout(20), vertical_alignment='top', expand_y=True)   
 ]]
 
-cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(1,cv2.CAP_DSHOW)
 fps = 30 
 cap.set(cv2.CAP_PROP_FPS,fps)    
 
@@ -75,16 +75,30 @@ cap.set(cv2.CAP_PROP_FPS,fps)
 window = sg.Window("Nico control GUI", layout, finalize=True)
 
 window.bind("<Escape>", "Exit")
-
-t0 = int(time.time())
-last_values = None
-torque = False
 for k in dofs:
-    motors.disableTorque(k)
+    window[k].bind('<ButtonRelease-1>', 'Click')
+window.bind("<Key-->", "Current-")
+window.bind("<Key-+>", "Current+")
+
+for k in dofs:
+    motors.enableTorque(k)
+torque = True
+
+current = dofs[0]
+last_values = None
+t0 = int(time.time()//2)
 while True:
     event, values = window.read(timeout=20)
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
+    elif event == "Set default position":
+        if not torque:
+            torque = True
+            window['Torque'].update(value="On")
+            for k in dofs:
+                motors.enableTorque(k)
+        for k in dofs:
+            motors.setDefaultPosition(k)
 
     if last_values is None:
         last_values = values
@@ -99,9 +113,9 @@ while True:
                     else:
                         degrees = False
                         print('degrees off')
-                    update_side_layout(layout,'Left',0)
-                    update_side_layout(layout,'Right',10)
-                    update_addons_layout(layout,20)
+                    update_side_layout('Left',0)
+                    update_side_layout('Right',10)
+                    update_addons_layout(20)
                 elif isinstance(k,int) and k == 5:
                     if values[k]:
                         torque = True
@@ -113,21 +127,39 @@ while True:
                         print('torque off')
                         for kk in dofs:
                             motors.disableTorque(kk)
-                elif isinstance(k, str) and 'read-' in k:
+                elif 'Click' in event and isinstance(k, str) and k in dofs:
                     if torque:
-                        print('set',k[5:],'to',values[k])
+                        print('set',k,'to',values[k])
                         if degrees:
-                            motors.setPositionDg(k[5:],int(values[k]))
+                            motors.setPositionDg(k,int(values[k]))
                         else:
-                            motors.setPosition(k[5:],int(values[k]))
+                            motors.setPosition(k,int(values[k]))
         last_values = values
 
-    t1 = int(time.time())
-    if t0 != t1:
-        for k in dofs:
-            position = motors.getPositionDg(k) if degrees else motors.getPosition(k)
-            window['read-'+k].update(value = position)
-            last_values['read-'+k] = float(position)
+    if 'Click' in event:
+        current = event[:-len('Click')]
+    elif 'Current' in event:
+        if torque:
+            diff = -1.0 if event[-1] == '-' else 1.0
+            minVal, maxVal, _ = motors.getRangeDg(current) if degrees else motors.getRange(current)
+            oldValue = values[current]
+            newValue = max(min(oldValue+diff,maxVal),minVal)
+            #print(oldValue,'->',newValue)
+            if oldValue != newValue:
+                window[current].update(value=newValue)
+                last_values[current] = newValue
+                print('set',current,'to',newValue)
+                if degrees:
+                    motors.setPositionDg(current,int(newValue))
+                else:
+                    motors.setPosition(current,int(newValue))
+    else:
+        t1 = int(time.time()//2)
+        if t0 != t1:
+            for k in dofs:
+                position = motors.getPositionDg(k) if degrees else motors.getPosition(k)
+                window[k].update(value = position)
+                last_values[k] = float(position)
             
     _, frame = cap.read()
     if frame is not None:
