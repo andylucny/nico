@@ -40,14 +40,17 @@ def update_side_layout(kind='Left', id=0): #id=10
 def addons_layout(id=20):
     layout = [
         [ sg.Text("Units", size=(10, 1)), sg.Radio("Bins", "Units", False, size=(10, 1)), sg.Radio("Degrees", "Units", True, size=(10, 1)) ],
-        [ sg.Text("Torque", size=(10, 1)), sg.Radio("Off", "Torque", False, size=(10, 1)), sg.Radio("On", "Torque", True, size=(10, 1)) ]
+        [ sg.Text("Torque", size=(10, 1)), sg.Radio("Off", "Torque", False, size=(10, 1)), sg.Radio("On", "Torque", True, size=(10, 1)) ],
+        [ sg.Text("Synchronize", size=(10, 1)), sg.Radio("Off", "Synchro", True, size=(10, 1)), sg.Radio("On", "Synchro", False, size=(10, 1)) ]
     ]
+    layout.append([ sg.HSeparator() ])
     texts = ["Neck up-down","Neck left-right"]
     for i in range(2):
         key = dofs[id+i]
         minVal, maxVal, defVal = motors.getRangeDg(key) if degrees else motors.getRange(key)
-        layout.append([ sg.Text(texts[i], size=(10, 1))])
         layout.append([ sg.Slider((minVal, maxVal), defVal, 1, orientation="h", size=(slider_v, slider_h), key=key) ])
+        layout.append([ sg.Text(texts[i], size=(10, 1))])
+    layout.append([ sg.HSeparator() ])
     layout.append([ sg.Push(), sg.Button("Set default position", size=(20, 1)) ])    
     layout.append([ sg.VPush() ])
     layout.append([ sg.Push(), sg.Button("Exit", size=(10, 1)) ])
@@ -83,6 +86,15 @@ window.bind("<Key-+>", "Current+")
 for k in dofs:
     motors.enableTorque(k)
 torque = True
+
+synchro = False
+def synchronized(key):
+    if 'left-' in key:
+        return key.replace('left-','right-')
+    elif 'right-' in key:
+        return key.replace('right-','left-')
+    else:
+        return key
 
 current = dofs[0]
 last_values = None
@@ -127,13 +139,24 @@ while True:
                         print('torque off')
                         for kk in dofs:
                             motors.disableTorque(kk)
-                elif 'Click' in event and isinstance(k, str) and k in dofs:
+                elif isinstance(k,int) and k == 7:
+                    synchro = values[k]
+                    print('synchonization on' if synchro else 'synchronization off')
+                elif isinstance(k, str) and k in dofs: #'Click' in event and 
                     if torque:
                         print('set',k,'to',values[k])
+                        if synchro:
+                            ks = synchronized(k)
+                            if ks != k:
+                                print('set',ks,'to',values[k])
                         if degrees:
                             motors.setPositionDg(k,int(values[k]))
+                            if synchro and ks != k:
+                                motors.setPositionDg(ks,int(values[k]))
                         else:
                             motors.setPosition(k,int(values[k]))
+                            if synchro and ks != k:
+                                motors.setPosition(ks,int(values[k]))
         last_values = values
 
     if 'Click' in event:
@@ -141,6 +164,8 @@ while True:
     elif 'Current' in event:
         if torque:
             diff = -1.0 if event[-1] == '-' else 1.0
+            if not degrees:
+                diff *= 5
             minVal, maxVal, _ = motors.getRangeDg(current) if degrees else motors.getRange(current)
             oldValue = values[current]
             newValue = max(min(oldValue+diff,maxVal),minVal)
@@ -149,10 +174,18 @@ while True:
                 window[current].update(value=newValue)
                 last_values[current] = newValue
                 print('set',current,'to',newValue)
+                if synchro:
+                    currents = synchronized(current)
+                    if currents != current:
+                        print('set',currents,'to',newValue)  
                 if degrees:
                     motors.setPositionDg(current,int(newValue))
+                    if synchro and currents != current:
+                        motors.setPositionDg(currents,int(newValue))
                 else:
                     motors.setPosition(current,int(newValue))
+                    if synchro and currents != current:
+                        motors.setPosition(currents,int(newValue))
     else:
         t1 = int(time.time()//2)
         if t0 != t1:
