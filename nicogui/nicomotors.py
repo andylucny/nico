@@ -15,20 +15,20 @@ class NicoMotors:
 #0,  55,  100,   87,    0,  80, 50,   0,   0,   0
 
     joints = {  # 'key'       : [ DXL_ID, [dg0,bin0,coef] dg=dg0+coef*(bin-bin0), [bin-from,bin-default,bin-to], [(dg,bin,name)], [MinDg, MaxDg, MinDg, MaxDg, Inverted] ]
-        'left-arm1'           : [ 22, [0,2048,-0.0865],  [2153,2048,1029], [(-10,2155,'forward'),(0,2060,'sideway'),(90,1010,'backward')], [  -75,  55, -100, 125, False] ],
-        'left-arm2'           : [  2, [0,2048,-0.0865],  [ 615,2048,2281], [(-20,2281,'behind'),(0,2080,'down'),(90,1020,'forward'),(135,600,'raise')], [  -30, 100, -180, 179, False] ],
-        'left-arm3'           : [  4, [0,1572,0.1],      [1248,2080,2080], [(-45,1000,'up-sideway'),(0,1550,'straight'),(45,2020,'down-attach')], [ -118,  87, -140, 100, True ] ],
-        'left-elbow1'         : [  6, [180,2030,-0.0865],[3169,3070,2030], [(52,3500,'closed'),(90,3070,'right-angled'),(180,2030,'straight')], [ -100,   0, -100, 180, False] ],
+        'left-arm1'           : [ 22, [0,2048,-0.0865],  [2149,2048,1154], [(-10,2155,'forward'),(0,2060,'sideway'),(90,1010,'backward')], [  -75,  55, -100, 125, False] ],
+        'left-arm2'           : [  2, [0,2048,-0.0865],  [ 656,2048,2281], [(-20,2281,'behind'),(0,2080,'down'),(90,1020,'forward'),(135,600,'raise')], [  -30, 100, -180, 179, False] ],
+        'left-arm3'           : [  4, [0,1572,0.1],      [1258,2075,2075], [(-45,1000,'up-sideway'),(0,1550,'straight'),(45,2020,'down-attach')], [ -118,  87, -140, 100, True ] ],
+        'left-elbow1'         : [  6, [180,2030,-0.0865],[3168,3105,2030], [(52,3500,'closed'),(90,3070,'right-angled'),(180,2030,'straight')], [ -100,   0, -100, 180, False] ],
         'left-wrist1'         : [ 41, [-90,0,0.045],     [   0,2000,4000], [(-90,0,'palm-up'),(0,2000,'palm-vertical'),(90,4000,'palm-vertical')], [  -80,  80, -180, 180, True ] ],
         'left-wrist2'         : [ 43, [0,1405,0.02],     [   0,1405,4095], [(-40,0,'opened'),(0,1300,'straight'),(75,4095,'closed')], [    0,  50, -180, 180, False] ],
         'left-thumb1'         : [ 45, [0,0,0.043956],    [   0,   0,4095], [(0,0,'opened'),(180,4095,'closed')],[  -75,   0, -180, 180, True ] ],
         'left-thumb2'         : [ 44, [0,0,0.043956],    [   0,1394,4095], [(0,0,'opened'),(180,4095,'closed')],[  -75,   0, -180, 180, True ] ],
         'left-forefinger'     : [ 46, [0,0,0.043956],    [   0,   0,4095], [(0,0,'opened'),(180,4095,'closed')],[  -75,   0, -180, 180, True ] ],
         'left-littlefingers'  : [ 47, [0,0,0.043956],    [   0,   0,4095], [(0,0,'opened'),(180,4095,'closed')],[  -75,   0,    0,   0, False] ],
-        'right-arm1'          : [ 21, [0,2048,0.0865],   [1804,2048,3045], [(-10,1800,'forward'),(0,2060,'sideway'),(90,3070,'backward')], [  -75,  55, -100, 125, False] ],
-        'right-arm2'          : [  1, [0,2048,0.0865],   [1820,2048,3444], [(-20,1810,'behind'),(0,2050,'down'),(90,3040,'forward'),(135,3460,'raise')], [  -30, 100, -180, 179, False] ],
-        'right-arm3'          : [  3, [0,2532,-0.1],     [2032,2032,2844], [(-45,3140,'up-sideway'),(0,2460,'straight'),(45,2050,'down-attach')], [ -118,  87, -140, 100, True ] ],
-        'right-elbow1'        : [  5, [180,2030,0.0865], [ 905,1040,2030], [(52,550,'closed'),(90,1040,'right-angled'),(180,2030,'straight')], [ -100,   0, -100, 180, False] ],
+        'right-arm1'          : [ 21, [0,2048,0.0865],   [1947,2048,2940], [(-10,1800,'forward'),(0,2060,'sideway'),(90,3070,'backward')], [  -75,  55, -100, 125, False] ],
+        'right-arm2'          : [  1, [0,2048,0.0865],   [1820,2048,3437], [(-20,1810,'behind'),(0,2050,'down'),(90,3040,'forward'),(135,3460,'raise')], [  -30, 100, -180, 179, False] ],
+        'right-arm3'          : [  3, [0,2532,-0.1],     [2035,2032,2843], [(-45,3140,'up-sideway'),(0,2460,'straight'),(45,2050,'down-attach')], [ -118,  87, -140, 100, True ] ],
+        'right-elbow1'        : [  5, [180,2030,0.0865], [ 918, 952,2030], [(52,550,'closed'),(90,1040,'right-angled'),(180,2030,'straight')], [ -100,   0, -100, 180, False] ],
         'right-wrist1'        : [ 31, [90,0,-0.045],     [   0,2000,4000], [(-90,4000,'palm-up'),(0,2000,'palm-vertical'),(90,0,'palm-vertical')], [  -80,  80, -180, 180, True ] ],
         'right-wrist2'        : [ 33, [0,1405,0.02],     [   0,1405,4095], [(-40,0,'opened'),(0,1300,'straight'),(75,4095,'closed')], [    0,  50, -180, 180, False] ],
         'right-thumb1'        : [ 35, [0,0,0.043956],    [   0,   0,4095], [(0,0,'opened'),(180,4095,'closed')],[  -75,   0, -180, 180, True ] ],
@@ -149,7 +149,7 @@ class NicoMotors:
             id = self.joints[k][0]
             errno, result = self.handler.write2ByteTxRx(port=self.port, dxl_id=id, address=self.ADDR_MX_MOVING_SPEED, data=speed)
 
-    def close():
+    def close(self):
         if self.opened:
             self.port.closePort()
             self.opened = False
