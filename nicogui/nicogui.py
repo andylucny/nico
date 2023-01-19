@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from nicomotors import NicoMotors
 from nicocameras import NicoCameras
+def quit():
+    os._exit(0)
 
 motors = NicoMotors('COM6')
 dofs = motors.dofs()
@@ -39,9 +41,9 @@ def side_layout(kind='Left', id=0): #id=10
     
 def addons_layout(id=20):
     layout = [
-        [ sg.Text("Units", size=(10, 1)), sg.Radio("Bins", "Units", False, size=(8, 1)), sg.Radio("Degrees", "Units", True, size=(8, 1)) ],
-        [ sg.Text("Torque", size=(10, 1)), sg.Radio("Off", "Torque", False, size=(8, 1)), sg.Radio("On", "Torque", True, size=(8, 1)) ],
-        [ sg.Text("Synchronize", size=(10, 1)), sg.Radio("Off", "Synchro", True, size=(8, 1)), sg.Radio("On", "Synchro", False, size=(8, 1)) ]
+        [ sg.Text("Units", size=(10, 1)), sg.Radio("Bins", "Units", False, size=(8, 1), key="Units-Bin"), sg.Radio("Degrees", "Units", True, size=(8, 1), key="Units-Degrees") ],
+        [ sg.Text("Torque", size=(10, 1)), sg.Radio("Off", "Torque", False, size=(8, 1), key="Torque-Off"), sg.Radio("On", "Torque", True, size=(8, 1), key="Torque-On") ],
+        [ sg.Text("Synchronize", size=(10, 1)), sg.Radio("Off", "Synchro", True, size=(8, 1), key="Synchro-Off"), sg.Radio("On", "Synchro", False, size=(8, 1),key="Synchro-On") ]
     ]
     layout.append([ sg.HSeparator() ])
     texts = ["Neck up-down","Neck left-right"]
@@ -55,14 +57,15 @@ def addons_layout(id=20):
     layout.append([ sg.HSeparator() ])
     layout.append([ 
         sg.Text("Capture", size=(6, 1)), 
+        sg.Text("0", size=(4,1), key="Captured"),
         sg.Push(), 
-        sg.Radio("Pose", "Mode of Recording", True, size=(5, 1)),
-        sg.Radio("Movement", "Mode of Recording", False, size=(10, 1))
+        sg.Radio("Pose", "Mode of Recording", True, size=(5, 1), key="Mode-Pose"),
+        sg.Radio("Movement", "Mode of Recording", False, size=(10, 1), key="Mode-Movement")
     ])
     layout.append([  
         sg.Text("Period", size=(6, 1)),
         sg.Slider((1,5000), 500, 1, orientation="h", size=(20, 10), key="Period"),
-        sg.Text("ms", size=(1, 1))
+        sg.Text("ms", size=(2, 1))
     ])
     layout.append([
         sg.Button("Start", size=(5, 1), key="Start Recording"),
@@ -111,9 +114,11 @@ def synchronized(key):
 
 period = 500
 mode = True #pose
-window["Stop Recording"].update(disabled=True)
+window["Stop Recording"].update(text='Next')
 record = False
 recorded = []
+window["Captured"].update(value=str(len(recorded)))
+replaying = False
 replay = -1
 current = dofs[0]
 last_values = None
@@ -125,7 +130,7 @@ while True:
     elif event == "Set default position":
         if not torque:
             torque = True
-            window['Torque'].update(value="On")
+            window["Torque-On"].update(value=True)
             for k in dofs:
                 motors.enableTorque(k)
         for k in dofs:
@@ -135,9 +140,9 @@ while True:
         last_values = values
     elif last_values != values:
         for k in values.keys():
-            if last_values[k] != values[k]:
+            if last_values[k] != values[k] and isinstance(k,str):
                 #print(k,'->',values[k])
-                if isinstance(k,int) and k == 3:
+                if k == "Units-Degrees":
                     if values[k]:
                         degrees = True
                         print('degrees on')
@@ -154,7 +159,7 @@ while True:
                         window[kk].update(range=(minVal, maxVal), value = values[kk])
                         last_values[kk] = values[kk]
                     break
-                elif isinstance(k,int) and k == 5:
+                elif k == "Torque-On":
                     if values[k]:
                         torque = True
                         print('torque on')
@@ -166,11 +171,11 @@ while True:
                         for kk in dofs:
                             motors.disableTorque(kk)
                     break
-                elif isinstance(k,int) and k == 7:
+                elif k == "Synchro-On":
                     synchro = values[k]
                     print('synchonization on' if synchro else 'synchronization off')
                     break
-                elif isinstance(k,int) and k == 11:
+                elif k == "Mode-Pose":
                     if values[k]:
                         mode = True
                         print('record pose')
@@ -178,11 +183,10 @@ while True:
                         mode = False
                         print('record movement')
                     record = False
-                    recorded = []
                     replay = -1
-                    window["Stop Recording"].update(disabled=mode)
+                    window["Stop Recording"].update(text="Stop" if mode else "Next")
                     break
-                elif isinstance(k, str) and k in dofs: #'Click' in event and 
+                elif k in dofs: #'Click' in event and 
                     if torque:
                         print('set',k,'to',values[k])
                         if synchro:
@@ -197,7 +201,7 @@ while True:
                             motors.setPosition(k,int(values[k]))
                             if synchro and ks != k:
                                 motors.setPosition(ks,int(values[k]))
-                elif isinstance(k, str) and k == "Period":
+                elif k == "Period":
                     period = int(values["Period"])
                     if period < 10:
                         pass
@@ -209,7 +213,7 @@ while True:
                         period = 500*(period//500)
                     window["Period"].update(value=float(period))
                     print("Period:",period)
-                elif isinstance(k, str) and k == "Save Recording" and values[k] != "":
+                elif k == "Save Recording" and values[k] != "":
                     filename = values[k]
                     with open(filename, 'w') as f:
                         for r in recorded:
@@ -217,13 +221,14 @@ while True:
                     window["Save Recording"].update(value='')
                     values[k] = ''
                     print('saved')
-                elif isinstance(k, str) and k == "Load Recording" and values[k] != "":
+                elif k == "Load Recording" and values[k] != "":
                     filename = values[k]
                     recorded = []
                     with open(filename, 'r') as f:
                         for line in f.readlines():
                             r = eval(line[:-1])
                             recorded.append(r)
+                    window["Captured"].update(value=str(len(recorded)))
                     window["Load Recording"].update(value='')
                     values[k] = ''
                     print('loaded')
@@ -262,13 +267,19 @@ while True:
     elif 'Start Recording' in event:
         print('recording started')
         recorded = []
+        window["Captured"].update(value=str(len(recorded)))
         record = True
+        window["Stop Recording"].update(text='Next')
     elif 'Stop Recording' in event:
-        print('recording stopped')
-        record = False
+        if mode:
+            print('record next')
+            record = True
+        else:
+            print('recording stopped')
+            record = False
     elif 'Replay Recording' in event:
-        replay = 0
-        print('replaying...')
+        replaying = True
+        print('replaying','one' if mode else 'many','...')
     
     t1 = int(time.time()*1000/period)
     if t0 != t1:
@@ -279,20 +290,25 @@ while True:
             last_values[k] = float(position)
         if record:
             recorded.append([last_values[k] for k in dofs] if degrees else [motors.bin2dg(k,last_values[k]) for k in dofs])
+            window["Captured"].update(value=str(len(recorded)))
             if mode:
                 record = False
-                print('recording stopped')
-        elif replay >= 0:
+                print("recorded")
+        elif replaying:
+            replay += 1
             if replay >= len(recorded):
                 replay = -1
-                print('...replayed')
+                replaying = False
+                print('...replayed many')
             else:
                 for positionDg, k in zip(recorded[replay],dofs):
                     position = positionDg if degrees else motors.dg2bin(k,positionDg)
                     motors.setPositionDg(k,position)
                     window[k].update(value = position)
                     last_values[k] = float(position)
-                replay += 1
+                if mode:
+                    replaying = False
+                    print('...replayed one')
         
     left_frame, right_frame = cameras.read()
     left_fps, right_fps = cameras.fps()
