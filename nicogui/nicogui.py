@@ -1,14 +1,23 @@
 import time
 import os
+import signal
 import PySimpleGUI as sg
 import cv2
 import numpy as np
+from beeply.notes import beeps
 from nicomotors import NicoMotors
 from nicocameras import NicoCameras
+
 def quit():
     os._exit(0)
 
-motors = NicoMotors('COM6')
+# exit on ctrl-c
+def signal_handler(signal, frame):
+    os._exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+motors = NicoMotors()
 dofs = motors.dofs()
 try:
     motors.open()
@@ -75,7 +84,8 @@ def addons_layout(id=20):
         sg.Input(key="Load Recording", enable_events=True, visible=False),
         sg.FileBrowse(button_text='Load', size=(5, 1), initial_folder=os.getcwd(), tooltip="load recorded data from a file", file_types=(("text files", "*.txt"),), target="Load Recording"),
         sg.Button("Replay", size=(5, 1), key="Replay Recording")
-    ])    
+    ])  
+    layout.append([ sg.Push(), sg.Checkbox('beep', default=True, key='beep'), sg.Text("0", size=(4,1), key="Replayed", visible=False) ])
     layout.append([ sg.VPush() ])
     layout.append([ sg.Push(), sg.Button("Exit", size=(10, 1)) ])
     return layout
@@ -89,6 +99,8 @@ layout = [[
 ]]
 
 cameras = NicoCameras()
+
+beeper = beeps(250)
 
 # Create the window and show it without the plot
 window = sg.Window("Nico control GUI", layout, finalize=True)
@@ -112,6 +124,10 @@ def synchronized(key):
     else:
         return key
 
+def synchronizable(key,basekey):
+    return ('left-' in basekey and 'right-' in key) or ('right-' in basekey and 'left-' in key)
+
+beep = True
 period = 500
 mode = True #pose
 window["Stop Recording"].update(text='Next')
@@ -184,7 +200,7 @@ while True:
                         print('record movement')
                     record = False
                     replay = -1
-                    window["Stop Recording"].update(text="Stop" if mode else "Next")
+                    window["Stop Recording"].update(text="Next" if mode else "Stop")
                     break
                 elif k in dofs: #'Click' in event and 
                     if torque:
@@ -232,6 +248,9 @@ while True:
                     window["Load Recording"].update(value='')
                     values[k] = ''
                     print('loaded')
+                elif k == "beep":
+                    beep = values[k]
+                    print('beep:',beep)
                 
         last_values = values
 
@@ -269,7 +288,6 @@ while True:
         recorded = []
         window["Captured"].update(value=str(len(recorded)))
         record = True
-        window["Stop Recording"].update(text='Next')
     elif 'Stop Recording' in event:
         if mode:
             print('record next')
@@ -277,9 +295,16 @@ while True:
         else:
             print('recording stopped')
             record = False
+        replaying = False
+        replay = -1
     elif 'Replay Recording' in event:
         replaying = True
         print('replaying','one' if mode else 'many','...')
+        if not torque:
+            torque = True
+            window["Torque-On"].update(value=True)
+            for k in dofs:
+                motors.enableTorque(k)
     
     t1 = int(time.time()*1000/period)
     if t0 != t1:
@@ -291,6 +316,8 @@ while True:
         if record:
             recorded.append([last_values[k] for k in dofs] if degrees else [motors.bin2dg(k,last_values[k]) for k in dofs])
             window["Captured"].update(value=str(len(recorded)))
+            if beep:
+                beeper.hear("C__") #print('\a')
             if mode:
                 record = False
                 print("recorded")
@@ -301,14 +328,24 @@ while True:
                 replaying = False
                 print('...replayed many')
             else:
+                positions = dict()
                 for positionDg, k in zip(recorded[replay],dofs):
+                    positions[k] = positionDg
+                if synchro:
+                    for k in dofs:
+                        if synchronizable(k,current):
+                            positions[k] = positions[synchronized(k)]
+                for k in dofs:
+                    positionDg = positions[k]
                     position = positionDg if degrees else motors.dg2bin(k,positionDg)
                     motors.setPositionDg(k,position)
                     window[k].update(value = position)
                     last_values[k] = float(position)
+                del positions
                 if mode:
                     replaying = False
                     print('...replayed one')
+            window["Replayed"].update(value=str(replay),visible=(replay != -1))
         
     left_frame, right_frame = cameras.read()
     left_fps, right_fps = cameras.fps()
