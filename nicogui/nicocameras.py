@@ -6,8 +6,8 @@ class NicoCameras:
 
     def __init__(self):
         self.ids = [0,2]
-        self.frames = dict()
-        self.fpss = dict()
+        self.frames = {}
+        self.fpss = {}
         for id in self.ids:
             self.frames[id] = None
             self.fpss[id] = 0
