@@ -23,6 +23,8 @@ try:
     motors.open()
 except:
     print('motors are not operational')
+    
+eyes = [ 'left-eye', 'right-eye' ]
 
 groups = {}
 groups['left-arm'] = [k for k in dofs[:6]]
@@ -41,7 +43,8 @@ def side_layout(kind='Left', id=0): #id=10
     layout = [[
         sg.Column([
             [ sg.Text(kind, size=(5, 1), justification="left") ],
-            [ sg.Text("", size=(5, 1), justification="left", key=kind+"-FPS") ]
+            [ sg.Text("", size=(5, 1), justification="left", key=kind+"-FPS") ],
+            [ sg.Checkbox('+', default=False, key='concern-'+kind+'Cross', enable_events=True) ]
         ], vertical_alignment='middle'), 
         sg.Image(filename="", key=kind+"-EYE") 
     ]]
@@ -108,13 +111,15 @@ def addons_layout(id=20):
     layout.append([ 
         sg.Checkbox('left arm  ', default=True, key='concern-left-arm', enable_events=True), 
         sg.Checkbox('left hand ', default=True, key='concern-left-hand', enable_events=True), 
+        sg.Checkbox('head', default=True, key='concern-head', enable_events=True),
         sg.Push(), 
         sg.Text("0", size=(4,1), key="Replayed", visible=False) 
     ])
     layout.append([ 
         sg.Checkbox('rigth arm', default=True, key='concern-right-arm', enable_events=True), 
         sg.Checkbox('right hand', default=True, key='concern-right-hand', enable_events=True), 
-        sg.Checkbox('head', default=True, key='concern-head', enable_events=True),
+        sg.Checkbox('left eye', default=False, key='concern-left-eye', enable_events=True),
+        sg.Checkbox('right eye', default=False, key='concern-right-eye', enable_events=True)
     ])
     layout.append([ 
         sg.Checkbox('beep', default=True, key='beep', enable_events=True)
@@ -160,6 +165,12 @@ def synchronized(key):
 
 def synchronizable(key,basekey):
     return ('left-' in basekey and 'right-' in key) or ('right-' in basekey and 'left-' in key)
+    
+def cross(img):
+    ofs = 40
+    h, w = img.shape[:2]
+    cv2.line(img,(w//2,0),(w//2,h-1),(0,0,255),3)
+    cv2.line(img,(0,h//2+ofs),(w-1,h//2+ofs),(0,0,255),3)
 
 beep = True
 period = 1000
@@ -167,13 +178,17 @@ mode = True #pose
 window["Stop Recording"].update(text='Next')
 record = False
 recorded = []
+recorded_images = []
 concerned_dofs = []
 window["Captured"].update(value=str(len(recorded)))
 replaying = False
 replay = -1
 current = dofs[0]
+newValue = None
 pressed = { k:False for k in dofs }
 concerned = { k:True for k in dofs }
+concerned.update({ k:False for k in eyes })
+concerned.update({ 'LeftCross':False, 'RightCross':False })
 t0 = int(time.time()*1000/period)
 while True:
     event, values = window.read(timeout=1)
@@ -216,30 +231,29 @@ while True:
                         else:
                             motors.setPosition(ks,int(values[k]))
                 current = k
+                newValue = None
     elif 'Current' in event:
         if torque:
+            if newValue is None:
+                newValue = values[current]
             diff = -1.0 if event[-1] == '-' else 1.0
-            if not degrees:
-                diff *= 5
+            newValue += diff
             minVal, maxVal, _ = motors.getRangeDg(current) if degrees else motors.getRange(current)
-            oldValue = values[current]
-            newValue = max(min(oldValue+diff,maxVal),minVal)
-            #print(oldValue,'->',newValue)
-            if oldValue != newValue:
-                window[current].update(value=newValue)
-                currents = synchronized(current)
-                if synchro == 0 or synchro == 1 or currents == current:
-                    print('set',current,'to',newValue)
-                    if degrees:
-                        motors.setPositionDg(current,int(newValue))
-                    else:
-                        motors.setPosition(current,int(newValue))
-                if (synchro == 1 or synchro == -1) and currents != current:
-                    print('set',currents,'to',newValue)  
-                    if degrees:
-                        motors.setPositionDg(currents,int(newValue))
-                    else:
-                        motors.setPosition(currents,int(newValue))
+            newValue = max(min(newValue,maxVal),minVal)
+            window[current].update(value=newValue)
+            currents = synchronized(current)
+            if synchro == 0 or synchro == 1 or currents == current:
+                print('set',current,'to',newValue)
+                if degrees:
+                    motors.setPositionDg(current,int(newValue))
+                else:
+                    motors.setPosition(current,int(newValue))
+            if (synchro == 1 or synchro == -1) and currents != current:
+                print('set',currents,'to',newValue)  
+                if degrees:
+                    motors.setPositionDg(currents,int(newValue))
+                else:
+                    motors.setPosition(currents,int(newValue))
     elif event == 'Units-Bin':
         degrees = False
         print('degrees off')
@@ -286,6 +300,9 @@ while True:
         record = False
         replay = -1
         window["Stop Recording"].update(text="Stop")
+        if period < 1000:
+            beep = False
+            window["beep"].update(value=False)
     elif event == "Period":
         period = int(values["Period"])
         if period < 10:
@@ -298,7 +315,7 @@ while True:
             period = 500*(period//500)
         print('period updated to ',period)
         window["Period"].update(value=float(period))
-        if period < 1000:
+        if period < 1000 and not mode:
             beep = False
             window["beep"].update(value=False)
     elif event == "Save Recording" and values["Save Recording"] != '':
@@ -308,10 +325,17 @@ while True:
             for r in recorded:
                 f.write(str(r)+'\n')
         window["Save Recording"].update(value='')
+        if len(recorded_images) > 0:
+            out = cv2.VideoWriter()
+            out.open(filename[:-4]+'.avi',cv2.VideoWriter_fourcc('F','F','V','1'),1,recorded_images[0].shape[:2][::-1])
+            for image in recorded_images:
+                out.write(image)
+            out.release()
         print('saved')
     elif event == "Load Recording" and values["Load Recording"] != '':
         filename = values["Load Recording"]
         recorded = []
+        recorded_images = []
         with open(filename, 'r') as f:
             lines = f.readlines()
             concerned_dofs = eval(lines[0])
@@ -339,12 +363,14 @@ while True:
                     change_current = True
             if change_current:
                 current = synchronized(current)
+                newValue = None
         window["Captured"].update(value=str(len(recorded)))
         window["Load Recording"].update(value='')
         print('loaded')        
     elif 'Start Recording' in event:
         print('recording started')
         recorded = []
+        recorded_images = []
         concerned_dofs = [ k for k in dofs if concerned[k] ]
         window["Captured"].update(value="0")
         record = True
@@ -371,27 +397,59 @@ while True:
         beep = values["beep"]
         print('beep:',beep)
     elif "concern-" in event:
-        for k in groups[event[8:]]:
-            concerned[k] = values[event]
-            if not values[event]:
-                motors.enableTorque(k)
-        recorded = []
-        concerned_dofs = [ k for k in dofs if concerned[k] ]
-        window["Captured"].update(value="0")
-        record = False
-        replay = -1
-        replaying = False
+        if "eye" in event or "Cross" in event:
+            concerned[event[8:]] = values[event]
+        else:
+            for k in groups[event[8:]]:
+                concerned[k] = values[event]
+                if not values[event]:
+                    motors.enableTorque(k)
+            recorded = []
+            recorded_images = []
+            concerned_dofs = [ k for k in dofs if concerned[k] ]
+            window["Captured"].update(value="0")
+            record = False
+            replay = -1
+            replaying = False
+
+    left_frame, right_frame = cameras.read()
+    left_fps, right_fps = cameras.fps()
+    left_view = left_frame
+    if left_view is not None and concerned['LeftCross']:
+        left_view = np.copy(left_frame)
+        cross(left_view)
+    right_view = right_frame
+    if right_view is not None and concerned['RightCross']:
+        right_view = np.copy(right_frame)
+        cross(right_view)        
+    if left_frame is not None and left_fps > 1: 
+        left_imgbytes = cv2.imencode(".png", cv2.resize(left_view,(320,240)))[1].tobytes()
+        window["Left-EYE"].update(data=left_imgbytes)
+        window["Left-FPS"].update(value=str(left_fps)+" fps")
+        if right_frame is None or right_fps <= 1:
+            window["Right-EYE"].update(data=left_imgbytes)
+            window["Right-FPS"].update(value="")
+    if right_frame is not None and right_fps > 1:
+        right_imgbytes = cv2.imencode(".png", cv2.resize(right_view,(320,240)))[1].tobytes()
+        window["Right-EYE"].update(data=right_imgbytes)
+        window["Right-FPS"].update(value=str(right_fps)+" fps")
     
     t1 = int(time.time()*1000/period)
     if t0 != t1:
         t0 = t1
         for k in dofs:
             position = motors.getPositionDg(k) if degrees else motors.getPosition(k)
+            if k == current:
+                if position == newValue:
+                    newValue = None
             if not pressed[k]:
                 window[k].update(value = position)
         if record:
             #print("recording", time.time(),t1)
             recorded.append([values[k] for k in dofs if concerned[k]] if degrees else [motors.bin2dg(k,values[k]) for k in dofs if concerned[k]])
+            concerned_frames = [ frame for eye, frame in zip(eyes,[left_frame,right_frame]) if concerned[eye] ]
+            if len(concerned_frames) > 0:
+                recorded_images.append(cv2.hconcat(concerned_frames))
             window["Captured"].update(value=str(len(recorded)))
             if beep:
                 beeper.hear("C__") #print('\a')
@@ -423,20 +481,6 @@ while True:
                     print('...replayed one')
         window["Replayed"].update(value=str(replay),visible=(replay != -1))
         
-    left_frame, right_frame = cameras.read()
-    left_fps, right_fps = cameras.fps()
-    if left_frame is not None and left_fps > 1: 
-        left_imgbytes = cv2.imencode(".png", cv2.resize(left_frame,(320,240)))[1].tobytes()
-        window["Left-EYE"].update(data=left_imgbytes)
-        window["Left-FPS"].update(value=str(left_fps)+" fps")
-        if right_frame is None or right_fps <= 1:
-            window["Right-EYE"].update(data=left_imgbytes)
-            window["Right-FPS"].update(value="")
-    if right_frame is not None and right_fps > 1:
-        right_imgbytes = cv2.imencode(".png", cv2.resize(right_frame,(320,240)))[1].tobytes()
-        window["Right-EYE"].update(data=right_imgbytes)
-        window["Right-FPS"].update(value=str(right_fps)+" fps")
-
 window.close()
 motors.close()
 cameras.close()

@@ -139,9 +139,7 @@ class NicoMotors:
                 print("Failed to change the baudrate")
                 continue
             self.handler = dynamixel.PacketHandler(protocol_version=self.PROTOCOL_VERSION)
-            response1 = self.handler.ping(port=self.port,dxl_id=253)
-            response2 = self.handler.ping(port=self.port,dxl_id=254)
-            if response1[1] < -3000 and response2[1] == -9000:
+            if self.ping():
                 print("ping successful")
                 self.opened = True
                 # set default moving speed
@@ -152,6 +150,11 @@ class NicoMotors:
                 print("ping failed")
                 self.port.closePort()
         return False
+        
+    def ping(self):
+        id = self.joints[self.keys[0]][0]
+        _, errno, _ = self.handler.read2ByteTxRx(port=self.port, dxl_id=id, address=self.ADDR_MX_PRESENT_POSITION)
+        return (errno == 0)
 
     def enableTorque(self,k): # Enable Dynamixel Torque
         if self.opened:
