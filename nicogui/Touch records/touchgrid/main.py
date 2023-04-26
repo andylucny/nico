@@ -6,8 +6,15 @@ motors = NicoMotors()
 motors.open()
 leftArmDofs = ['left-arm1', 'left-arm2', 'left-arm3', 'left-elbow1', 'left-wrist1', 'left-wrist2', 'left-thumb1', 'left-thumb2', 'left-forefinger', 'left-littlefingers']
 
-for dof in leftArmDofs:
-	motors.enableTorque(dof)
+def enableTorque():
+    for dof in leftArmDofs:
+        motors.enableTorque(dof)
+
+def disableTorque():
+    for dof in leftArmDofs:
+        motors.disableTorque(dof)
+
+enableTorque()
 
 def setLeftArm(angles):
 	for dof,angle in zip(leftArmDofs,angles):
@@ -78,8 +85,10 @@ def touch(p):
         middlePose = [2.0, 66.0, 22.0, 180.0, 90.0, 25.0, 0.0, 58.0, 0.0, 83.0]
         endPose = [-9.0, 17.0, 50.0, 110.0, 20.0, 24.0, 0.0, 57.0, 0.0, 83.0]
     elif p[0] == 'B' and p[1] == '1':  # B1
-        middlePose = [48.0, 49.0, 48.0, 144.0, 81.0, 26.0, 0.0, 57.0, 0.0, 82.0]
-        endPose = [10.0, 6.0, 38.0, 99.0, 11.0, 33.0, 0.0, 58.0, 0.0, 82.0]
+        middlePose = [45.0, 44.0, 44.0, 120.0, 21.0, 40.0, 0.0, 58.0, 0.0, 81.0]
+        endPose = [60.0, 55.0, 40.0, 156.0, 81.0, 26.0, 0.0, 57.0, 0.0, 82.0]
+        #middlePose = [48.0, 49.0, 48.0, 144.0, 81.0, 26.0, 0.0, 57.0, 0.0, 82.0]
+        #endPose = [10.0, 6.0, 38.0, 99.0, 11.0, 33.0, 0.0, 58.0, 0.0, 82.0]
     elif p[0] == 'B' and p[1] == '2':  # B2
         middlePose = [78.0, 12.0, -6.0, 122.0, 39.0, 31.0, 0.0, 57.0, 0.0, 82.0]
         endPose = [13.0, 12.0, 22.0, 111.0, -23.0, 26.0, 0.0, 57.0, 0.0, 82.0]
@@ -126,7 +135,7 @@ def touch(p):
         print("try again")
     perform([startPose,middlePose,endPose])
     time.sleep(1.0)
-    perform([startPose])
+    perform([middlePose,startPose])
     #setDefaultPose()
 
 def globalTest():
@@ -135,5 +144,11 @@ def globalTest():
             touch(f+g)
             time.sleep(1.2)
 
-#touch('B7')
+touch('B1')
 #globalTest()
+
+#B1
+#middlePose = [45.0, 44.0, 44.0, 120.0, 21.0, 40.0, 0.0, 58.0, 0.0, 81.0]
+#endPose = [60.0, 55.0, 40.0, 156.0, 81.0, 26.0, 0.0, 57.0, 0.0, 82.0]
+#setLeftArm(middlePose)
+#setLeftArm(endPose)
