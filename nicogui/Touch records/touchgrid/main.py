@@ -129,4 +129,11 @@ def touch(p):
     perform([startPose])
     #setDefaultPose()
 
-touch('B7')
+def globalTest():
+    for f in ['A','B','C']:
+        for g in ['1','2','3','4','5','6','7','8']:
+            touch(f+g)
+            time.sleep(1.2)
+
+#touch('B7')
+#globalTest()
