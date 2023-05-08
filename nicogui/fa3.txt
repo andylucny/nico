@@ -1,0 +1,2 @@
+['left-arm1', 'left-arm2', 'left-arm3', 'left-elbow1', 'left-wrist1', 'left-wrist2', 'left-thumb1', 'left-thumb2', 'left-forefinger', 'left-littlefingers', 'neck1', 'neck2']
+[47.0, 44.0, 32.0, 139.0, 90.0, 27.0, 90.0, 91.0, 0.0, 172.0, -38.0, 0.0]
