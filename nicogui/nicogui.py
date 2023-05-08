@@ -366,6 +366,8 @@ while True:
                 newValue = None
         window["Captured"].update(value=str(len(recorded)))
         window["Load Recording"].update(value='')
+        replay = -1
+        replaying = False
         print('loaded')        
     elif 'Start Recording' in event:
         print('recording started')
