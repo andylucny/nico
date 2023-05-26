@@ -81,6 +81,7 @@ def perform(points):
     i = 0
     print('point',i)
     setLeftArm(points[i])
+    last_error = 1e5
     while i < len(points):
         time.sleep(0.05)
         angles = []
@@ -90,14 +91,16 @@ def perform(points):
         goal = points[i]
         error = np.linalg.norm(np.array(angles)-np.array(goal))/len(angles)
         print(' error',error)
-        eps=1.3
+        eps=3.0 #1.3
         if error < eps:
-            i += 1
-            if i < len(points):
-                print('point',i)
-                setLeftArm(points[i])
-            else:
-                print('done')
+            if error+0.001 >= last_error:
+                i += 1
+                if i < len(points):
+                    print('point',i)
+                    setLeftArm(points[i])
+                else:
+                    print('done')
+        last_error = error
 
 perform([pose0])
 
@@ -109,28 +112,29 @@ def biobackward(pose,w=0.0):
     ps = getLeftArm()
     return [ [w*pose[0]+(1.0-w)*ps[0]]+pose[1:], pose ]
 
-def touch(p):
+def touch(p,w=0.8):
     x = ord(p[1])-ord('1')
     y = ord(p[0])-ord('A')
     pose = poses[y][x]
     #perform([pose0])
-    points = bioforward(pose)
+    points = bioforward(pose,w)
     perform(points)
     time.sleep(1)
     points = biobackward(pose0)
     perform(points)
 
-def globalTest():
+def globalTest(w=0.8):
     for f in ['A','B','C']:
         for g in ['1','2','3','4','5','6','7','8']:
             if f+g == 'A1':
                 continue
-            touch(f+g)
+            touch(f+g,w)
             time.sleep(1)
 
 #touch('B1')
-globalTest()
+#globalTest(w=0.8)
 
+"""
 def loadRecording(filename):
     recorded = []
     recorded_images = []
@@ -188,3 +192,4 @@ def predict(points, ts, coef=1.0):
         time.sleep(t*coef)
 
 #predict(points, ts, 0.95)
+"""
