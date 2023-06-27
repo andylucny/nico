@@ -1,4 +1,6 @@
 from nicomotors import NicoMotors
+import PySimpleGUI as sg
+from agentspace import Agent, space
 import numpy as np
 import time, random
 
@@ -66,8 +68,6 @@ posesC = [
     [-9.0, -10.0,  0.0,  75.0, 90.0, 44.0, 90.0, 95.0, 0.0, 173.0, -35.0, -46.0]
 ]
 
-
-
 poses = [posesA, posesB, posesC]
 
 def setDefaultPose():
@@ -85,6 +85,8 @@ def perform(points):
     setLeftArm(points[i])
     while i < len(points):
         time.sleep(0.05)
+        if space(default=False)["button"]:
+            break
         angles = []
         for dof in leftArmDofs:
             angle = motors.getPositionDg(dof)
@@ -112,50 +114,95 @@ def biobackward(pose,w=0.0):
     ps = getLeftArm()
     return [ [w*pose[0]+(1.0-w)*ps[0]]+pose[1:], pose ]
 
+class ExperimentAgent(Agent):
 
+    def init(self):
+        space.attach_trigger("experiment",self)
 
-def experiment():
-    name = input("Give me a name: ")
-    head = input("Head (Y/N): ")
-    file = open("Experiment/" + name + ".txt", "a")
+    def senseSelectAct(self):
+        space["button"] = False
+        name = space(default="xxx")["name"]
+        file = open("Experiment/" + name + ".txt", "a")
     
+        positions = ["A1","A2","A3","A4","A5","A6","A7","A8",
+                     "B1","B2","B3","B4","B5","B6","B7","B8",
+                     "C1","C2","C3","C4","C5","C6","C7","C8" ]
+
+        samples = random.sample(positions, 5) # 5 == pocet vybranych pozicii
     
-    positions = ["A1","A2","A3","A4","A5","A6","A7","A8",
-                 "B1","B2","B3","B4","B5","B6","B7","B8",
-                 "C1","C2","C3","C4","C5","C6","C7","C8" ]
+        for p in samples:
+            file.write(f"Touched: {p}")
+            x = ord(p[1])-ord('1')
+            y = ord(p[0])-ord('A')
+            pose = poses[y][x]
 
-    samples = random.sample(positions, 5) # 5 == pocet vybranych pozicii
+            head = space(default=True)['head']
+            if head:
+                pose = pose[:-2] + [-2.0, 0.0]
+            
+            middlePose = []
+            for i in range(len(pose)-2):
+                middlePose.append((pose[i]+pose0[i])/2)
+
+            middlePose += pose[-2:]
+
+            perform([pose0])
+            points = bioforward(middlePose)
+            perform(points)
+
+            space["button"] = False
+
+            space["experiment"] = False
+            while not space["experiment"]:
+                time.sleep(0.5)
+            
+            predicated = space(default="")["prediction"]
+            file.write(f" | Predicated:{predicated} | Head:{head} \n")
+
+            points = bioforward(pose)
+            perform(points)
+            
+            time.sleep(1)
+            points = biobackward(pose0) #defaultna poloha
+            
+            perform(points)
+
+            space["experiment"] = False
+
+
+        file.close()
+
+
+#GUI
+layout = [
+    [ 
+        sg.Text("Name", size=(25, 1)), 
+        sg.Radio("Head", "moving", True, size=(8, 1), key="Head", enable_events=True),
+        sg.Text("Prediction", size=(25, 1)), 
+        sg.Button("Run", size=(10, 1)),
+        sg.Button("Stop", size=(10, 1)),
+        sg.Button("Exit", size=(10, 1)),
+    ],
+]
+window = sg.Window("Experiment", layout, finalize=True)
+window['Stop'].bind("<Return>", "_Enter")
+head = True
+name = ""
+while True:
+    event, values = window.read(timeout=1)
+    if event == "Exit" or event == sg.WIN_CLOSED:
+        break
+    elif event == "Head":
+        head = values["Head"] == "moving"
+        space["head"] = head
+    elif event == "Run":
+        space["experiment"] = True
+    elif event == "Stop":
+        space["experiment"] = False
+        space["button"] = True
     
-    for p in samples:
-        file.write(f"Touched: {p}")
-        x = ord(p[1])-ord('1')
-        y = ord(p[0])-ord('A')
-        pose = poses[y][x]
-
-        if head == 'N':
-            pose = pose[:-2] + [-2.0, 0.0]
+    if "name" in values.keys():
+        space["name"] = values["name"]
+    if "prediction" in values.keys():
+        space["prediction"] = values["prediction"]
         
-        middlePose = []
-        for i in range(len(pose)-2):
-            middlePose.append((pose[i]+pose0[i])/2)
-
-        middlePose += pose[-2:]
-
-        
-        perform([pose0])
-        points = bioforward(middlePose)
-        perform(points)
-
-        predicated = input("Enter prediction: ")
-        file.write(f" | Predicated:{predicated} \n")
-
-        points = bioforward(pose)
-        perform(points)
-        
-        time.sleep(1)
-        points = biobackward(pose0) #defaultna poloha
-        
-        perform(points)
-    file.close()
-
-

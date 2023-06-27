@@ -1,2 +1,0 @@
-['left-arm1', 'left-arm2', 'left-arm3', 'left-elbow1', 'left-wrist1', 'left-wrist2', 'left-thumb1', 'left-thumb2', 'left-forefinger', 'left-littlefingers', 'neck1', 'neck2']
-[-9.0, 26.0, 29.0, 109.0, 90.0, 51.0, 90.0, 93.0, 0.0, 172.0, -34.0, 0.0]
