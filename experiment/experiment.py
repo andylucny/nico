@@ -3,6 +3,10 @@ import PySimpleGUI as sg
 from agentspace import Agent, space
 import numpy as np
 import time, random
+import os
+
+def quit():
+    os._exit(0)
 
 motors = NicoMotors()
 dofs = motors.dofs()
@@ -114,95 +118,131 @@ def biobackward(pose,w=0.0):
     ps = getLeftArm()
     return [ [w*pose[0]+(1.0-w)*ps[0]]+pose[1:], pose ]
 
+positions = ["A1","A2","A3","A4","A5","A6","A7","A8",
+             "B1","B2","B3","B4","B5","B6","B7","B8",
+             "C1","C2","C3","C4","C5","C6","C7","C8" ]
+
+samples = random.sample(positions, 5) # 5 == pocet vybranych pozicii
+
 class ExperimentAgent(Agent):
 
     def init(self):
         space.attach_trigger("experiment",self)
 
     def senseSelectAct(self):
+        global samples, window
+        
+        print("starting experiment")
         space["button"] = False
+    
+        p = samples[0]
+        samples = samples[1:]
+        
         name = space(default="xxx")["name"]
-        file = open("Experiment/" + name + ".txt", "a")
-    
-        positions = ["A1","A2","A3","A4","A5","A6","A7","A8",
-                     "B1","B2","B3","B4","B5","B6","B7","B8",
-                     "C1","C2","C3","C4","C5","C6","C7","C8" ]
+        file = open("Experiment/" + name + ".txt", "a")    
+        file.write(f"Touched: {p}")
+        x = ord(p[1])-ord('1')
+        y = ord(p[0])-ord('A')
+        pose = poses[y][x]
 
-        samples = random.sample(positions, 5) # 5 == pocet vybranych pozicii
-    
-        for p in samples:
-            file.write(f"Touched: {p}")
-            x = ord(p[1])-ord('1')
-            y = ord(p[0])-ord('A')
-            pose = poses[y][x]
+        head = space(default=True)['head']
+        if head:
+            pose = pose[:-2] + [-2.0, 0.0]
+        
+        middlePose = []
+        for i in range(len(pose)-2):
+            middlePose.append((pose[i]+pose0[i])/2)
 
-            head = space(default=True)['head']
-            if head:
-                pose = pose[:-2] + [-2.0, 0.0]
-            
-            middlePose = []
-            for i in range(len(pose)-2):
-                middlePose.append((pose[i]+pose0[i])/2)
+        middlePose += pose[-2:]
 
-            middlePose += pose[-2:]
+        perform([pose0])
+        points = bioforward(middlePose)
+        perform(points)
 
-            perform([pose0])
-            points = bioforward(middlePose)
-            perform(points)
+        space["button"] = False
 
-            space["button"] = False
+        print("enter prediction")
+        window["Run"].update(text="Continue")
+        space["experiment"] = False
+        while not space["experiment"]:
+            time.sleep(0.5)
+        print("continue")
+        
+        predicated = space(default="")["prediction"]
+        file.write(f" | Predicated:{predicated} | Head:{head} \n")
 
-            space["experiment"] = False
-            while not space["experiment"]:
-                time.sleep(0.5)
-            
-            predicated = space(default="")["prediction"]
-            file.write(f" | Predicated:{predicated} | Head:{head} \n")
+        points = bioforward(pose)
+        perform(points)
+        
+        time.sleep(1)
+        points = biobackward(pose0) #defaultna poloha
+        
+        perform(points)
 
-            points = bioforward(pose)
-            perform(points)
-            
-            time.sleep(1)
-            points = biobackward(pose0) #defaultna poloha
-            
-            perform(points)
-
-            space["experiment"] = False
-
+        space["experiment"] = False
+        window["Run"].update(text="Run")
 
         file.close()
+        print("experiment done,",len(samples),"remaining")
+        
+        if len(samples) == 0:
+            print("all experiments done")
+            self.stop()
 
+ExperimentAgent()
 
 #GUI
 layout = [
     [ 
-        sg.Text("Name", size=(25, 1)), 
-        sg.Radio("Head", "moving", True, size=(8, 1), key="Head", enable_events=True),
-        sg.Text("Prediction", size=(25, 1)), 
+        sg.Text("Name", size=(10, 1)), 
+        sg.Input("", size=(25, 1), key="Name"), 
+    ],
+    [ 
+        sg.Text("Head", size=(10, 1)), 
+        sg.Radio("Off", "Head", False, size=(8, 1), key="Head-off", enable_events=True), 
+        sg.Radio("On", "Head", True, size=(8, 1), key="Head-on", enable_events=True) 
+    ],
+    [
+        sg.Text("Prediction", size=(10, 1)), 
+        sg.Input("", size=(25, 1), key="Prediction", enable_events=True), 
+    ],
+    [
         sg.Button("Run", size=(10, 1)),
         sg.Button("Stop", size=(10, 1)),
         sg.Button("Exit", size=(10, 1)),
     ],
 ]
 window = sg.Window("Experiment", layout, finalize=True)
-window['Stop'].bind("<Return>", "_Enter")
+window.bind("<Return>", "Stop")
 head = True
-name = ""
 while True:
     event, values = window.read(timeout=1)
+    if event != "__TIMEOUT__":
+        print(event)
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
-    elif event == "Head":
-        head = values["Head"] == "moving"
+    elif event == "Head-off":
+        head = False
+        space["head"] = head
+    elif event == "Head-on":
+        head = True
         space["head"] = head
     elif event == "Run":
         space["experiment"] = True
     elif event == "Stop":
-        space["experiment"] = False
-        space["button"] = True
+        if space(default=False)["experiment"]:
+            space["experiment"] = False
+            space["button"] = True
+            print("Button pressed")
     
-    if "name" in values.keys():
-        space["name"] = values["name"]
-    if "prediction" in values.keys():
-        space["prediction"] = values["prediction"]
-        
+    if "Name" in values.keys():
+        if space(default="")["name"] != values["Name"]:
+            space["name"] = values["Name"]
+            print("name",space["name"])
+    if "Prediction" in values.keys():
+        if space(default="")["prediction"] != values["Prediction"]:
+            space["prediction"] = values["Prediction"]
+            print("prediction",space["prediction"])
+
+window.close()
+       
