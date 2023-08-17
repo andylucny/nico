@@ -13,9 +13,11 @@ add to PATH which.exe from cygwin64
 add to PATH setserial.exe downloaded from github.com/andylucny/dummysetserial
 in e.g. c:\Python39\Lib\site-packages\nicomotion-1.0-py3.9.egg\nicomotion\
 - comment out _adjust_port_latency (instead set DeviceManage/Ports/Properties/PortSettings/Advanced/LatencyTimer 16->1
-- patch Motion.py to support RH6Hand (derived from RH7Hand by removing l_wrist_y and r_wrist_y
-in e.g. c:\Python39\Lib\site-packages\pypot-3.1.2-py3.9.egg\pypot\dynamixel\motor.py
-- patch numpy.float to numpy.float32
+- patch nicomotion and pypot to 
+  - support RH6Hand (derived from RH7Hand by removing l_wrist_y and r_wrist_y)
+  - avoid stucking the Eros logical board (hand) when ids are requested.
+  in e.g. c:\Python39\Lib\site-packages\pypot-3.1.2-py3.9.egg\pypot\dynamixel\motor.py
+  - patch numpy.float to numpy.float32
 #nicovision:
 #install from \NICO-software\api\src\nicovision\ by
 #python setup.py install
