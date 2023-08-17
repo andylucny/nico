@@ -1,0 +1,3 @@
+nico_humanoid_upper_rh7d_ukba.json is modification of nico_humanoid_upper_rh7d.json :
+l_wrist_y (thas is not present) has been removed
+Type of the EROS logical board is modified to avoid getting ids that freezes all its motors
