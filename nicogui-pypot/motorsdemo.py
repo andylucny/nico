@@ -29,6 +29,9 @@ robot.getAngleLowerLimit("head_z") # joint[name]; return angle[dg]
 robot.getAngleUpperLimit("head_z") # joint[name]; return angle[dg]
 
 robot.getJointNames() # list of joint[name]s  
+# 'head_z', 'head_y', 'l_shoulder_z', 'l_shoulder_y', 'l_arm_x', 'l_elbow_y', 'r_shoulder_z', 'r_shoulder_y', 'r_arm_x',
+# 'r_elbow_y', 'r_wrist_z', 'r_wrist_x', 'r_thumb_z', 'r_thumb_x', 'r_indexfinger_x', 'r_middlefingers_x', 'l_wrist_z', 
+# 'l_wrist_x', 'l_thumb_z', 'l_thumb_x', 'l_indexfinger_x', 'l_middlefingers_x'
 
 robot.getPalmSensorReading("r_hand") # or l_hand  touch<=15
 
@@ -87,5 +90,35 @@ for i in range(200):
     time.sleep(0.5)
 
 robot.setAngle('r_wrist_z',0,0.05)
+
+for joint in robot.getJointNames():
+    low_ = robot.getAngleLowerLimit(joint)
+    high_ = robot.getAngleUpperLimit(joint)
+    low = min(round(low_,-1),round(high_,-1))
+    high = max(round(low_,-1),round(high_,-1))
+    print(joint, low, high)
+
+#head_z -90.0 90.0
+#head_y -40.0 30.0
+#l_shoulder_z -30.0 80.0
+#l_shoulder_y -30.0 180.0
+#l_arm_x -0.0 70.0
+#l_elbow_y 50.0 180.0
+#r_shoulder_z -30.0 80.0
+#r_shoulder_y -30.0 180.0
+#r_arm_x -0.0 70.0
+#r_elbow_y 50.0 180.0
+#r_wrist_z -180.0 180.0
+#r_wrist_x -180.0 180.0
+#r_thumb_z -180.0 180.0
+#r_thumb_x -180.0 180.0
+#r_indexfinger_x -180.0 180.0
+#r_middlefingers_x -180.0 180.0
+#l_wrist_z -180.0 180.0
+#l_wrist_x -180.0 180.0
+#l_thumb_z -180.0 180.0
+#l_thumb_x -180.0 180.0
+#l_indexfinger_x -180.0 180.0
+#l_middlefingers_x -180.0 180.0
 
 del robot # close
