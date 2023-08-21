@@ -1,0 +1,148 @@
+import threading
+import time
+import numpy as np
+import cv2
+import os
+import requests
+import zipfile
+import io
+import subprocess
+
+def download(path,url):
+    if os.path.exists(path):
+        return
+    print("downloading",path)
+    response = requests.get(url)
+    if response.ok:
+        file_like_object = io.BytesIO(response.content)
+        zipfile_object = zipfile.ZipFile(file_like_object)    
+        zipfile_object.extractall(".")
+
+def initializeCameraControls():
+    download("v4l2-ctl.exe","https://www.agentspace.org/download/v4l2-ctl.zip")  
+
+def getCameraControls(id,controls):
+    command = [ "v4l2-ctl", "-d", f"/dev/video{id}" ]
+    for control in controls:
+        command += [ "-C", f"{control}" ]
+    data = subprocess.check_output(command)
+    output = data.decode()
+    values = output.split('\r\n')
+    return [ int(value) for value in values[:-1] ]
+    
+def setCameraControls(id,controls):
+    command = [ "v4l2-ctl", "-d", f"/dev/video{id}" ]
+    for control in controls.keys():
+        value = controls[control]
+        command += [ "-c", f"{control}={value}" ]
+        _ = subprocess.check_output(command)
+
+def getCameraDevices(name):
+    command = [ "v4l2-ctl", "--list-devices" ]
+    data = subprocess.check_output(command)
+    output = data.decode()
+    names = output.split('\r\n')
+    ids = [ id for id in range(len(names)) if name in names[id] ]
+    return ids
+
+class NicoCameras:
+
+    def __init__(self):
+        self.stopped = False
+        initializeCameraControls()
+        self.ids = getCameraDevices("See3CAM_CU135") # [0,2]
+        if len(self.ids) == 0:
+            self.ids = [0,0]
+        elif len(self.ids) == 1:
+            id = self.ids[0]
+            self.ids = [id,id]
+        self.frames = {}
+        self.fpss = {}
+        for id in self.ids:
+            self.frames[id] = None
+            self.fpss[id] = 0
+        print('starting camera threads')
+        self.threads = []
+        launched=[]
+        for i in range(len(self.ids)):
+            if self.ids[i] in launched:
+                continue
+            thread = threading.Thread(name="camera"+str(i), target=self.grabbing, args=(self.ids[i],))
+            thread.start()
+            self.threads.append(thread)
+            launched.append(self.ids[i])
+        self.zooms = {}
+        self.tilts = {}
+        self.pans = {}
+        for id in self.ids:
+            zoom, tilt, pan = getCameraControls(id,['zoom_absolute','tilt_absolute','pan_absolute'])
+            self.zooms[id] = zoom
+            self.tilts[id] = tilt
+            self.pans[id] = pan
+        self.tocheck = True
+
+    def grabbing(self,id):
+        print(f'grabbing thread {id} started')
+        camera = cv2.VideoCapture(id,cv2.CAP_DSHOW)
+        fps = 30 
+        camera.set(cv2.CAP_PROP_FPS,fps)
+        fps = 0
+        t0 = time.time()
+        while True:
+            hasFrame, self.frames[id] = camera.read()
+            if not hasFrame or self.stopped:
+                break
+            t1 = time.time()
+            if int(t1) != int(t0):
+                self.fpss[id] = fps
+                fps = 0
+                t0 = t1
+            fps += 1
+            cv2.waitKey(1)
+
+    def read(self):
+        frames = tuple([ self.frames[id] for id in self.ids ])
+        if self.tocheck:
+            if len(frames) == 2 and frames[0] is not None and frames[1] is not None and frames[0].shape == frames[1].shape:
+                if self.check(frames[0],frames[1]):
+                    self.ids.reverse()
+                    frames = list(frames)
+                    frames.reverse()
+                    frames = tuple(frames)    
+                self.tocheck = False
+        return frames
+
+    def fps(self):
+        return ( self.fpss[id] for id in self.ids )
+        
+    def getZoom(self):
+        return ( self.zooms[id] for id in self.ids )
+        
+    def getTilt(self):
+        return ( self.tilts[id] for id in self.ids )
+
+    def getPan(self):
+        return ( self.pans[id] for id in self.ids )
+
+    def setZoom(self,i,zoom):
+        self.zooms[self.ids[i]] = zoom
+        setCameraControls(self.ids[i],{'zoom_absolute':zoom})
+        
+    def setTilt(self,i,tilt):
+        self.tilts[self.ids[i]] = tilt
+        setCameraControls(self.ids[i],{'tilt_absolute':tilt})
+
+    def setPan(self,i,pan):
+        self.pans[self.ids[i]] = pan
+        setCameraControls(self.ids[i],{'pan_absolute':pan})
+        
+    def close(self):
+        self.stopped = True
+
+    def check(self,left,right):
+        left_gray = cv2.cvtColor(left,cv2.COLOR_BGR2GRAY)
+        right_gray = cv2.cvtColor(right,cv2.COLOR_BGR2GRAY)
+        left_src = 1.0 - np.float32(left_gray)/255.0
+        right_src = 1.0 - np.float32(right_gray)/255.0
+        ret, confidence = cv2.phaseCorrelate(left_src,right_src)
+        return confidence > 0.1 and ret[0] < -1.0

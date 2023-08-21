@@ -35,4 +35,3 @@ cd _build\html
 explorer index.html
 or browse \NICO-software\api-doc\_build\html\index.html
 
-v4l2-ctl -d /dev/video0 --list-formats-ext
