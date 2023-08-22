@@ -188,7 +188,7 @@
       "type": "SR-SEED28",
       "id": 31,
       "angle_limit": [-180,180],
-      "orientation": "direct"
+      "orientation": "indirect"
     },
     "r_wrist_x": {
       "offset": 0.0,

@@ -202,10 +202,10 @@ torque = True
 
 synchro = 0
 def synchronized(key):
-    if key.startswith('l_' in key:
-        key[0] = 'r'
+    if key.startswith('l_'):
+        return 'r'+key[1:]
     elif 'r_' in key:
-        key[0] = 'l' 
+        return 'l'+key[1:]
     return key
 
 def synchronizable(key,basekey):
@@ -302,10 +302,16 @@ while True:
                     value = int(values[k])
                     if 'zoom' in k:
                         cameras.setZoom(i,value)
+                        if synchro:
+                            cameras.setZoom(1-i,value)
                     elif 'tilt' in k:
                         cameras.setTilt(i,value)
+                        if synchro:
+                            cameras.setTilt(1-i,value)
                     elif 'pan' in k:
                         cameras.setPan(i,value)
+                        if synchro:
+                            cameras.setPan(1-i,value)
                 current = k
                 newValue = None
     elif 'Current' in event:
@@ -333,16 +339,22 @@ while True:
                 newValue = max(min(newValue,800.0),100.0)
                 if orgValue != newValue:
                     cameras.setZoom(i,int(newValue))
+                    if synchro:
+                        cameras.setZoom(1-i,int(newValue))
                     window[current].update(value=newValue)
             elif 'tilt' in current:
                 newValue = max(min(newValue,180.0),-180.0)
                 if orgValue != newValue:
                     cameras.setTilt(i,int(newValue))
+                    if synchro:
+                        cameras.setTilt(1-i,int(newValue))
                     window[current].update(value=newValue)
             elif 'pan' in current:
                 newValue = max(min(newValue,180.0),-180.0)
                 if orgValue != newValue:
                     cameras.setPan(i,int(newValue))
+                    if synchro:
+                        cameras.setPan(1-i,int(newValue))
                     window[current].update(value=newValue)
     elif event == 'Torque-On':
         torque = True
