@@ -56,11 +56,13 @@ class NicoCameras:
         elif len(self.ids) == 1:
             id = self.ids[0]
             self.ids = [id,id]
+        print('camera ids:',self.ids)
         self.frames = {}
         self.fpss = {}
         for id in self.ids:
             self.frames[id] = None
             self.fpss[id] = 0
+        time.sleep(1)
         print('starting camera threads')
         self.threads = []
         launched=[]
@@ -95,6 +97,7 @@ class NicoCameras:
             t1 = time.time()
             if int(t1) != int(t0):
                 self.fpss[id] = fps
+                #print('camera',id,fps,'fps',self.frames[id].shape if self.frames[id] is not None else 'none')
                 fps = 0
                 t0 = t1
             fps += 1
@@ -139,10 +142,11 @@ class NicoCameras:
     def close(self):
         self.stopped = True
 
-    def check(self,left,right):
-        left_gray = cv2.cvtColor(left,cv2.COLOR_BGR2GRAY)
-        right_gray = cv2.cvtColor(right,cv2.COLOR_BGR2GRAY)
-        left_src = 1.0 - np.float32(left_gray)/255.0
-        right_src = 1.0 - np.float32(right_gray)/255.0
-        ret, confidence = cv2.phaseCorrelate(left_src,right_src)
-        return confidence > 0.1 and ret[0] < -1.0
+    def check(self,left,right): #TBD
+        return False # means OK
+        #left_gray = cv2.cvtColor(left,cv2.COLOR_BGR2GRAY)
+        #right_gray = cv2.cvtColor(right,cv2.COLOR_BGR2GRAY)
+        #left_src = 1.0 - np.float32(left_gray)/255.0
+        #right_src = 1.0 - np.float32(right_gray)/255.0
+        #ret, confidence = cv2.phaseCorrelate(left_src,right_src)
+        #return confidence > 0.1 and ret[0] < -1.0

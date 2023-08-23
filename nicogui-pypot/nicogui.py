@@ -250,27 +250,27 @@ while True:
         #    robot.toSafePosition() # initial position
         safe = { # standard position
             'l_shoulder_z':0.0,
-            'l_shoulder_y':1.0,
+            'l_shoulder_y':0.0,
             'l_arm_x':0.0,
-            'l_elbow_y':91.0,
-            'l_wrist_z':-4.0,
+            'l_elbow_y':89.0,
+            'l_wrist_z':0.0,
             'l_wrist_x':-56.0,
             'l_thumb_z':-57.0,
             'l_thumb_x':-180.0,
             'l_indexfinger_x':-180.0,
             'l_middlefingers_x':-180.0,
             'r_shoulder_z':0.0,
-            'r_shoulder_y':1.0,
+            'r_shoulder_y':0.0,
             'r_arm_x':0.0,
-            'r_elbow_y':91.0,
-            'r_wrist_z':-5.0,
+            'r_elbow_y':89.0,
+            'r_wrist_z':0.0,
             'r_wrist_x':-56.0,
             'r_thumb_z':-57.0,
             'r_thumb_x':-180.0,
             'r_indexfinger_x':-180.0,
             'r_middlefingers_x':-180.0,
-            'head_z':1.0,
-            'head_y':1.0
+            'head_z':0.0,
+            'head_y':0.0
         }
         for k in safe.keys():
             robot.setAngle(k,safe[k],defaultSpeed)
@@ -301,16 +301,22 @@ while True:
                     i = 0 if k.startswith('Left-') else 1
                     value = int(values[k])
                     if 'zoom' in k:
+                        print('zoom camera',i,'to',value)
                         cameras.setZoom(i,value)
                         if synchro:
+                            print('zoom camera',1-i,'to',value)
                             cameras.setZoom(1-i,value)
                     elif 'tilt' in k:
+                        print('tilt camera',i,'to',value)
                         cameras.setTilt(i,value)
                         if synchro:
+                            print('tilt camera',1-i,'to',value)
                             cameras.setTilt(1-i,value)
                     elif 'pan' in k:
+                        print('pan camera',i,'to',value)
                         cameras.setPan(i,value)
                         if synchro:
+                            print('pan camera',1-i,'to',value)
                             cameras.setPan(1-i,value)
                 current = k
                 newValue = None
@@ -338,22 +344,28 @@ while True:
             if 'zoom' in current:
                 newValue = max(min(newValue,800.0),100.0)
                 if orgValue != newValue:
+                    print('zoom camera',i,'to',value)
                     cameras.setZoom(i,int(newValue))
                     if synchro:
+                        print('zoom camera',1-i,'to',value)
                         cameras.setZoom(1-i,int(newValue))
                     window[current].update(value=newValue)
             elif 'tilt' in current:
                 newValue = max(min(newValue,180.0),-180.0)
                 if orgValue != newValue:
+                    print('tilt camera',i,'to',value)
                     cameras.setTilt(i,int(newValue))
                     if synchro:
+                        print('tilt camera',1-i,'to',value)
                         cameras.setTilt(1-i,int(newValue))
                     window[current].update(value=newValue)
             elif 'pan' in current:
                 newValue = max(min(newValue,180.0),-180.0)
                 if orgValue != newValue:
+                    print('pan camera',i,'to',value)
                     cameras.setPan(i,int(newValue))
                     if synchro:
+                        print('pan camera',1-i,'to',value)
                         cameras.setPan(1-i,int(newValue))
                     window[current].update(value=newValue)
     elif event == 'Torque-On':
