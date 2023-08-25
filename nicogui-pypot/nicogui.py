@@ -217,378 +217,383 @@ def cross(img):
     cv2.line(img,(w//2,0),(w//2,h-1),(0,0,255),3)
     cv2.line(img,(0,h//2+ofs),(w-1,h//2+ofs),(0,0,255),3)
 
-beep = True
-period = 1000
-mode = True #pose
-window["Stop Recording"].update(text='Next')
-record = False
-recorded = []
-recorded_images = []
-concerned_dofs = []
-window["Captured"].update(value=str(len(recorded)))
-replaying = False
-replay = -1
-current = dofs[0]
-newValue = None
-pressed = { k:False for k in dofs }
-pressed.update({ k:False for k in controls })
-concerned = { k:True for k in dofs }
-concerned.update({ k:False for k in eyes })
-concerned.update({ 'LeftCross':False, 'RightCross':False })
-t0 = int(time.time()*1000/period)
-while True:
-    event, values = window.read(timeout=1)
-    if event == "Exit" or event == sg.WIN_CLOSED:
-        break
-    elif event == "Set default position":
-        if not torque:
-            torque = True
-            window["Torque-On"].update(value=True)
-            for k in dofs:
-                robot.enableTorque(k)
-        #for k in dofs:
-        #    robot.toSafePosition() # initial position
-        safe = { # standard position
-            'l_shoulder_z':0.0,
-            'l_shoulder_y':0.0,
-            'l_arm_x':0.0,
-            'l_elbow_y':89.0,
-            'l_wrist_z':0.0,
-            'l_wrist_x':-56.0,
-            'l_thumb_z':-57.0,
-            'l_thumb_x':-180.0,
-            'l_indexfinger_x':-180.0,
-            'l_middlefingers_x':-180.0,
-            'r_shoulder_z':0.0,
-            'r_shoulder_y':0.0,
-            'r_arm_x':0.0,
-            'r_elbow_y':89.0,
-            'r_wrist_z':0.0,
-            'r_wrist_x':-56.0,
-            'r_thumb_z':-57.0,
-            'r_thumb_x':-180.0,
-            'r_indexfinger_x':-180.0,
-            'r_middlefingers_x':-180.0,
-            'head_z':0.0,
-            'head_y':0.0
-        }
-        for k in safe.keys():
-            robot.setAngle(k,safe[k],defaultSpeed)
+try:
 
-#    if event != '__TIMEOUT__':
-#    print(event)
-        
-    if 'Press' in event:
-        for k in dofs + controls:
-            if k in event:
-                print(k,' pressed')
-                pressed[k] = True
-    elif 'Release' in event:
-        for k in dofs + controls:
-            if k in event:
-                print(k,' released',values[k])
-                pressed[k] = False
-                if k in dofs:
-                    if enabledTorque(k): #torque:
-                        ks = synchronized(k)
-                        if synchro == 0 or synchro == 1 or ks == k:
-                            print('set',k,'to',values[k])
-                            robot.setAngle(k,values[k],defaultSpeed)
-                        if (synchro == 1 or synchro == -1) and ks != k:
-                            print('set',ks,'to',values[k])
-                            robot.setAngle(ks,values[k],defaultSpeed)
-                else:
-                    i = 0 if k.startswith('Left-') else 1
-                    value = int(values[k])
-                    if 'zoom' in k:
+    beep = True
+    period = 1000
+    mode = True #pose
+    window["Stop Recording"].update(text='Next')
+    record = False
+    recorded = []
+    recorded_images = []
+    concerned_dofs = []
+    window["Captured"].update(value=str(len(recorded)))
+    replaying = False
+    replay = -1
+    current = dofs[0]
+    newValue = None
+    pressed = { k:False for k in dofs }
+    pressed.update({ k:False for k in controls })
+    concerned = { k:True for k in dofs }
+    concerned.update({ k:False for k in eyes })
+    concerned.update({ 'LeftCross':False, 'RightCross':False })
+    t0 = int(time.time()*1000/period)
+    while True:
+        event, values = window.read(timeout=1)
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+        elif event == "Set default position":
+            if not torque:
+                torque = True
+                window["Torque-On"].update(value=True)
+                for k in dofs:
+                    robot.enableTorque(k)
+            #for k in dofs:
+            #    robot.toSafePosition() # initial position
+            safe = { # standard position
+                'l_shoulder_z':0.0,
+                'l_shoulder_y':0.0,
+                'l_arm_x':0.0,
+                'l_elbow_y':89.0,
+                'l_wrist_z':0.0,
+                'l_wrist_x':-56.0,
+                'l_thumb_z':-57.0,
+                'l_thumb_x':-180.0,
+                'l_indexfinger_x':-180.0,
+                'l_middlefingers_x':-180.0,
+                'r_shoulder_z':0.0,
+                'r_shoulder_y':0.0,
+                'r_arm_x':0.0,
+                'r_elbow_y':89.0,
+                'r_wrist_z':0.0,
+                'r_wrist_x':-56.0,
+                'r_thumb_z':-57.0,
+                'r_thumb_x':-180.0,
+                'r_indexfinger_x':-180.0,
+                'r_middlefingers_x':-180.0,
+                'head_z':0.0,
+                'head_y':0.0
+            }
+            for k in safe.keys():
+                robot.setAngle(k,safe[k],defaultSpeed)
+
+    #    if event != '__TIMEOUT__':
+    #    print(event)
+            
+        if 'Press' in event:
+            for k in dofs + controls:
+                if k in event:
+                    print(k,' pressed')
+                    pressed[k] = True
+        elif 'Release' in event:
+            for k in dofs + controls:
+                if k in event:
+                    print(k,' released',values[k])
+                    pressed[k] = False
+                    if k in dofs:
+                        if enabledTorque(k): #torque:
+                            ks = synchronized(k)
+                            if synchro == 0 or synchro == 1 or ks == k:
+                                print('set',k,'to',values[k])
+                                robot.setAngle(k,values[k],defaultSpeed)
+                            if (synchro == 1 or synchro == -1) and ks != k:
+                                print('set',ks,'to',values[k])
+                                robot.setAngle(ks,values[k],defaultSpeed)
+                    else:
+                        i = 0 if k.startswith('Left-') else 1
+                        value = int(values[k])
+                        if 'zoom' in k:
+                            print('zoom camera',i,'to',value)
+                            cameras.setZoom(i,value)
+                            if synchro:
+                                print('zoom camera',1-i,'to',value)
+                                cameras.setZoom(1-i,value)
+                        elif 'tilt' in k:
+                            print('tilt camera',i,'to',value)
+                            cameras.setTilt(i,value)
+                            if synchro:
+                                print('tilt camera',1-i,'to',value)
+                                cameras.setTilt(1-i,value)
+                        elif 'pan' in k:
+                            print('pan camera',i,'to',value)
+                            cameras.setPan(i,value)
+                            if synchro:
+                                print('pan camera',1-i,'to',value)
+                                cameras.setPan(1-i,value)
+                    current = k
+                    newValue = None
+        elif 'Current' in event:
+            diff = -1.0 if event[-1] == '-' else 1.0
+            if newValue is None:
+                newValue = values[current]
+            if current in dofs:
+                if enabledTorque(current): #torque:
+                    newValue += diff
+                    minVal, maxVal, _ = getRange(current)
+                    newValue = max(min(newValue,maxVal),minVal)
+                    window[current].update(value=newValue)
+                    currents = synchronized(current)
+                    if synchro == 0 or synchro == 1 or currents == current:
+                        print('set',current,'to',newValue)
+                        robot.setAngle(current,newValue,defaultSpeed)
+                    if (synchro == 1 or synchro == -1) and currents != current:
+                        print('set',currents,'to',newValue)  
+                        robot.setAngle(currents,newValue,defaultSpeed)
+            else:
+                i = 0 if current.startswith('Left-') else 1
+                orgValue = newValue
+                newValue += diff
+                if 'zoom' in current:
+                    newValue = max(min(newValue,800.0),100.0)
+                    if orgValue != newValue:
                         print('zoom camera',i,'to',value)
-                        cameras.setZoom(i,value)
+                        cameras.setZoom(i,int(newValue))
                         if synchro:
                             print('zoom camera',1-i,'to',value)
-                            cameras.setZoom(1-i,value)
-                    elif 'tilt' in k:
+                            cameras.setZoom(1-i,int(newValue))
+                        window[current].update(value=newValue)
+                elif 'tilt' in current:
+                    newValue = max(min(newValue,180.0),-180.0)
+                    if orgValue != newValue:
                         print('tilt camera',i,'to',value)
-                        cameras.setTilt(i,value)
+                        cameras.setTilt(i,int(newValue))
                         if synchro:
                             print('tilt camera',1-i,'to',value)
-                            cameras.setTilt(1-i,value)
-                    elif 'pan' in k:
+                            cameras.setTilt(1-i,int(newValue))
+                        window[current].update(value=newValue)
+                elif 'pan' in current:
+                    newValue = max(min(newValue,180.0),-180.0)
+                    if orgValue != newValue:
                         print('pan camera',i,'to',value)
-                        cameras.setPan(i,value)
+                        cameras.setPan(i,int(newValue))
                         if synchro:
                             print('pan camera',1-i,'to',value)
-                            cameras.setPan(1-i,value)
-                current = k
-                newValue = None
-    elif 'Current' in event:
-        diff = -1.0 if event[-1] == '-' else 1.0
-        if newValue is None:
-            newValue = values[current]
-        if current in dofs:
-            if enabledTorque(current): #torque:
-                newValue += diff
-                minVal, maxVal, _ = getRange(current)
-                newValue = max(min(newValue,maxVal),minVal)
-                window[current].update(value=newValue)
-                currents = synchronized(current)
-                if synchro == 0 or synchro == 1 or currents == current:
-                    print('set',current,'to',newValue)
-                    robot.setAngle(current,newValue,defaultSpeed)
-                if (synchro == 1 or synchro == -1) and currents != current:
-                    print('set',currents,'to',newValue)  
-                    robot.setAngle(currents,newValue,defaultSpeed)
-        else:
-            i = 0 if current.startswith('Left-') else 1
-            orgValue = newValue
-            newValue += diff
-            if 'zoom' in current:
-                newValue = max(min(newValue,800.0),100.0)
-                if orgValue != newValue:
-                    print('zoom camera',i,'to',value)
-                    cameras.setZoom(i,int(newValue))
-                    if synchro:
-                        print('zoom camera',1-i,'to',value)
-                        cameras.setZoom(1-i,int(newValue))
-                    window[current].update(value=newValue)
-            elif 'tilt' in current:
-                newValue = max(min(newValue,180.0),-180.0)
-                if orgValue != newValue:
-                    print('tilt camera',i,'to',value)
-                    cameras.setTilt(i,int(newValue))
-                    if synchro:
-                        print('tilt camera',1-i,'to',value)
-                        cameras.setTilt(1-i,int(newValue))
-                    window[current].update(value=newValue)
-            elif 'pan' in current:
-                newValue = max(min(newValue,180.0),-180.0)
-                if orgValue != newValue:
-                    print('pan camera',i,'to',value)
-                    cameras.setPan(i,int(newValue))
-                    if synchro:
-                        print('pan camera',1-i,'to',value)
-                        cameras.setPan(1-i,int(newValue))
-                    window[current].update(value=newValue)
-    elif event == 'Torque-On':
-        torque = True
-        print('torque on')
-        for k in dofs:
-            robot.enableTorque(k)
-    elif event == 'Torque-Off':
-        torque = False
-        print('torque off')
-        for k in dofs:
-            if concerned[k]:
-                robot.disableTorque(k)
-    elif event == 'Synchro-Off':
-        synchro = 0
-        print('synchronization off')
-    elif event == 'Synchro-On':
-        synchro = 1
-        print('synchronization on')
-    elif event == 'Synchro-Reverse':
-        synchro = -1
-        print('synchronization reverse')
-    elif event == 'Mode-Pose':
-        mode = True
-        print('record pose')
-        record = False
-        replay = -1
-        window["Stop Recording"].update(text="Next")
-    elif event == 'Mode-Movement':
-        mode = False
-        print('record movement')
-        record = False
-        replay = -1
-        window["Stop Recording"].update(text="Stop")
-        if period < 1000:
-            beep = False
-            window["beep"].update(value=False)
-    elif event == "Period":
-        period = int(values["Period"])
-        if period < 10:
-            period = 10
-        elif period < 100:
-            period = 10*(period//10)
-        elif period < 1000:
-            period = 100*(period//100)
-        else:
-            period = 500*(period//500)
-        print('period updated to ',period)
-        window["Period"].update(value=float(period))
-        if period < 1000 and not mode:
-            beep = False
-            window["beep"].update(value=False)
-    elif event == "Save Recording" and values["Save Recording"] != '':
-        filename = values["Save Recording"]
-        with open(filename, 'w') as f:
-            f.write(str(concerned_dofs)+'\n')  
-            for r in recorded:
-                f.write(str(r)+'\n')
-        window["Save Recording"].update(value='')
-        if len(recorded_images) > 0:
-            out = cv2.VideoWriter()
-            out.open(filename[:-4]+'.avi',cv2.VideoWriter_fourcc('F','F','V','1'),1,recorded_images[0].shape[:2][::-1])
-            for image in recorded_images:
-                out.write(image)
-            out.release()
-        print('saved')
-    elif event == "Load Recording" and values["Load Recording"] != '':
-        filename = values["Load Recording"]
-        recorded = []
-        recorded_images = []
-        with open(filename, 'r') as f:
-            lines = f.readlines()
-            concerned_dofs = eval(lines[0])
-            for line in lines[1:]:
-                r = eval(line[:-1])
-                recorded.append(r)
-            for k in dofs:
-                concerned[k] = False
-            for group in groups.keys():
-                concern = False
-                for k in concerned_dofs:
-                    if k in groups[group]:
-                        concern = True
-                        break
-                if concern:
-                    for k in groups[group]:
-                        concerned[k] = True
-                window['concern-'+group].update(value=concern)
-            change_current = False
-            for k in concerned_dofs:
-                if k == current:
-                    change_current = False
-                    break
-                elif synchronized(k) == current:
-                    change_current = True
-            if change_current:
-                current = synchronized(current)
-                newValue = None
-        window["Captured"].update(value=str(len(recorded)))
-        window["Load Recording"].update(value='')
-        replay = -1
-        replaying = False
-        print('loaded')        
-    elif 'Start Recording' in event:
-        print('recording started')
-        recorded = []
-        recorded_images = []
-        concerned_dofs = [ k for k in dofs if concerned[k] ]
-        window["Captured"].update(value="0")
-        record = True
-        replay = -1
-        replaying = False
-    elif 'Stop Recording' in event:
-        if mode:
-            print('record next')
-            record = True
-        else:
-            print('recording stopped')
-            record = False
-        replay = -1
-        replaying = False
-    elif 'Replay Recording' in event:
-        replaying = True
-        print('replaying','one' if mode else 'many','...')
-        if not torque:
+                            cameras.setPan(1-i,int(newValue))
+                        window[current].update(value=newValue)
+        elif event == 'Torque-On':
             torque = True
-            window["Torque-On"].update(value=True)
+            print('torque on')
             for k in dofs:
                 robot.enableTorque(k)
-    elif event == "beep":
-        beep = values["beep"]
-        print('beep:',beep)
-    elif "concern-" in event:
-        if "eye" in event or "Cross" in event:
-            concerned[event[8:]] = values[event]
-        else:
-            for k in groups[event[8:]]:
-                concerned[k] = values[event]
-                if not values[event]:
-                    robot.enableTorque(k)
+        elif event == 'Torque-Off':
+            torque = False
+            print('torque off')
+            for k in dofs:
+                if concerned[k]:
+                    robot.disableTorque(k)
+        elif event == 'Synchro-Off':
+            synchro = 0
+            print('synchronization off')
+        elif event == 'Synchro-On':
+            synchro = 1
+            print('synchronization on')
+        elif event == 'Synchro-Reverse':
+            synchro = -1
+            print('synchronization reverse')
+        elif event == 'Mode-Pose':
+            mode = True
+            print('record pose')
+            record = False
+            replay = -1
+            window["Stop Recording"].update(text="Next")
+        elif event == 'Mode-Movement':
+            mode = False
+            print('record movement')
+            record = False
+            replay = -1
+            window["Stop Recording"].update(text="Stop")
+            if period < 1000:
+                beep = False
+                window["beep"].update(value=False)
+        elif event == "Period":
+            period = int(values["Period"])
+            if period < 10:
+                period = 10
+            elif period < 100:
+                period = 10*(period//10)
+            elif period < 1000:
+                period = 100*(period//100)
+            else:
+                period = 500*(period//500)
+            print('period updated to ',period)
+            window["Period"].update(value=float(period))
+            if period < 1000 and not mode:
+                beep = False
+                window["beep"].update(value=False)
+        elif event == "Save Recording" and values["Save Recording"] != '':
+            filename = values["Save Recording"]
+            with open(filename, 'w') as f:
+                f.write(str(concerned_dofs)+'\n')  
+                for r in recorded:
+                    f.write(str(r)+'\n')
+            window["Save Recording"].update(value='')
+            if len(recorded_images) > 0:
+                out = cv2.VideoWriter()
+                out.open(filename[:-4]+'.avi',cv2.VideoWriter_fourcc('F','F','V','1'),1,recorded_images[0].shape[:2][::-1])
+                for image in recorded_images:
+                    out.write(image)
+                out.release()
+            print('saved')
+        elif event == "Load Recording" and values["Load Recording"] != '':
+            filename = values["Load Recording"]
+            recorded = []
+            recorded_images = []
+            with open(filename, 'r') as f:
+                lines = f.readlines()
+                concerned_dofs = eval(lines[0])
+                for line in lines[1:]:
+                    r = eval(line[:-1])
+                    recorded.append(r)
+                for k in dofs:
+                    concerned[k] = False
+                for group in groups.keys():
+                    concern = False
+                    for k in concerned_dofs:
+                        if k in groups[group]:
+                            concern = True
+                            break
+                    if concern:
+                        for k in groups[group]:
+                            concerned[k] = True
+                    window['concern-'+group].update(value=concern)
+                change_current = False
+                for k in concerned_dofs:
+                    if k == current:
+                        change_current = False
+                        break
+                    elif synchronized(k) == current:
+                        change_current = True
+                if change_current:
+                    current = synchronized(current)
+                    newValue = None
+            window["Captured"].update(value=str(len(recorded)))
+            window["Load Recording"].update(value='')
+            replay = -1
+            replaying = False
+            print('loaded')        
+        elif 'Start Recording' in event:
+            print('recording started')
             recorded = []
             recorded_images = []
             concerned_dofs = [ k for k in dofs if concerned[k] ]
             window["Captured"].update(value="0")
-            record = False
+            record = True
             replay = -1
             replaying = False
-
-    left_frame, right_frame = cameras.read()
-    left_fps, right_fps = cameras.fps()
-    left_view = left_frame
-    if left_view is not None and concerned['LeftCross']:
-        left_view = np.copy(left_frame)
-        cross(left_view)
-    right_view = right_frame
-    if right_view is not None and concerned['RightCross']:
-        right_view = np.copy(right_frame)
-        cross(right_view)        
-    if left_frame is not None and left_fps > 1: 
-        left_imgbytes = cv2.imencode(".png", cv2.resize(left_view,(320,240)))[1].tobytes()
-        window["Left-EYE"].update(data=left_imgbytes)
-        window["Left-FPS"].update(value=str(left_fps)+" fps")
-        if right_frame is None or right_fps <= 1:
-            window["Right-EYE"].update(data=left_imgbytes)
-            window["Right-FPS"].update(value="")
-    if right_frame is not None and right_fps > 1:
-        right_imgbytes = cv2.imencode(".png", cv2.resize(right_view,(320,240)))[1].tobytes()
-        window["Right-EYE"].update(data=right_imgbytes)
-        window["Right-FPS"].update(value=str(right_fps)+" fps")
-    
-    t1 = int(time.time()*1000/period)
-    if t0 != t1:
-        t0 = t1
-        for k in dofs:
-            position = robot.getAngle(k)
-            if k == current:
-                if position == newValue:
-                    newValue = None
-            if not pressed[k]:
-                window[k].update(value = position)
-        window['Left-palm'].update(value = robot.getPalmSensorReading("l_hand"))
-        window['Right-palm'].update(value = robot.getPalmSensorReading("r_hand"))
-        for i in range(2):
-            window[controls[0+i*3]].update(value = list(cameras.getZoom())[i])
-            window[controls[1+i*3]].update(value = list(cameras.getTilt())[i])
-            window[controls[2+i*3]].update(value = list(cameras.getPan())[i])
-        if record:
-            #print("recording", time.time(),t1)
-            recorded.append([values[k] for k in dofs if concerned[k]])
-            concerned_frames = [ frame for eye, frame in zip(eyes,[left_frame,right_frame]) if concerned[eye] ]
-            if len(concerned_frames) > 0:
-                recorded_images.append(cv2.hconcat(concerned_frames))
-            window["Captured"].update(value=str(len(recorded)))
-            if beep:
-                beeper.hear("C__") #print('\a')
+        elif 'Stop Recording' in event:
             if mode:
+                print('record next')
+                record = True
+            else:
+                print('recording stopped')
                 record = False
-                print("recorded")
-        elif replaying:
-            replay += 1
-            if replay >= len(recorded):
+            replay = -1
+            replaying = False
+        elif 'Replay Recording' in event:
+            replaying = True
+            print('replaying','one' if mode else 'many','...')
+            if not torque:
+                torque = True
+                window["Torque-On"].update(value=True)
+                for k in dofs:
+                    robot.enableTorque(k)
+        elif event == "beep":
+            beep = values["beep"]
+            print('beep:',beep)
+        elif "concern-" in event:
+            if "eye" in event or "Cross" in event:
+                concerned[event[8:]] = values[event]
+            else:
+                for k in groups[event[8:]]:
+                    concerned[k] = values[event]
+                    if not values[event]:
+                        robot.enableTorque(k)
+                recorded = []
+                recorded_images = []
+                concerned_dofs = [ k for k in dofs if concerned[k] ]
+                window["Captured"].update(value="0")
+                record = False
                 replay = -1
                 replaying = False
-                print('...replayed many')
-            else:
-                positions = { k:position for position, k in zip(recorded[replay],concerned_dofs) }
-                if synchro == 1 or synchro == -1:
-                    for k in concerned_dofs:
-                        ks = synchronized(k)
-                        if ks != k:
-                            positions[ks] = positions[k]
-                            if synchro == -1:
-                                del positions[k]
-                for k in positions.keys():
-                    position = positions[k]
-                    robot.setAngle(k,position,defaultSpeed)
-                    if not pressed[k]:
-                        window[k].update(value = position)
-                if mode:
-                    replaying = False
-                    print('...replayed one')
-        window["Replayed"].update(value=str(replay),visible=(replay != -1))
+
+        left_frame, right_frame = cameras.read()
+        left_fps, right_fps = cameras.fps()
+        left_view = left_frame
+        if left_view is not None and concerned['LeftCross']:
+            left_view = np.copy(left_frame)
+            cross(left_view)
+        right_view = right_frame
+        if right_view is not None and concerned['RightCross']:
+            right_view = np.copy(right_frame)
+            cross(right_view)        
+        if left_frame is not None and left_fps > 1: 
+            left_imgbytes = cv2.imencode(".png", cv2.resize(left_view,(320,240)))[1].tobytes()
+            window["Left-EYE"].update(data=left_imgbytes)
+            window["Left-FPS"].update(value=str(left_fps)+" fps")
+            if right_frame is None or right_fps <= 1:
+                window["Right-EYE"].update(data=left_imgbytes)
+                window["Right-FPS"].update(value="")
+        if right_frame is not None and right_fps > 1:
+            right_imgbytes = cv2.imencode(".png", cv2.resize(right_view,(320,240)))[1].tobytes()
+            window["Right-EYE"].update(data=right_imgbytes)
+            window["Right-FPS"].update(value=str(right_fps)+" fps")
         
+        t1 = int(time.time()*1000/period)
+        if t0 != t1:
+            t0 = t1
+            for k in dofs:
+                position = robot.getAngle(k)
+                if k == current:
+                    if position == newValue:
+                        newValue = None
+                if not pressed[k]:
+                    window[k].update(value = position)
+            window['Left-palm'].update(value = robot.getPalmSensorReading("l_hand"))
+            window['Right-palm'].update(value = robot.getPalmSensorReading("r_hand"))
+            for i in range(2):
+                window[controls[0+i*3]].update(value = list(cameras.getZoom())[i])
+                window[controls[1+i*3]].update(value = list(cameras.getTilt())[i])
+                window[controls[2+i*3]].update(value = list(cameras.getPan())[i])
+            if record:
+                #print("recording", time.time(),t1)
+                recorded.append([values[k] for k in dofs if concerned[k]])
+                concerned_frames = [ frame for eye, frame in zip(eyes,[left_frame,right_frame]) if concerned[eye] ]
+                if len(concerned_frames) > 0:
+                    recorded_images.append(cv2.hconcat(concerned_frames))
+                window["Captured"].update(value=str(len(recorded)))
+                if beep:
+                    beeper.hear("C__") #print('\a')
+                if mode:
+                    record = False
+                    print("recorded")
+            elif replaying:
+                replay += 1
+                if replay >= len(recorded):
+                    replay = -1
+                    replaying = False
+                    print('...replayed many')
+                else:
+                    positions = { k:position for position, k in zip(recorded[replay],concerned_dofs) }
+                    if synchro == 1 or synchro == -1:
+                        for k in concerned_dofs:
+                            ks = synchronized(k)
+                            if ks != k:
+                                positions[ks] = positions[k]
+                                if synchro == -1:
+                                    del positions[k]
+                    for k in positions.keys():
+                        position = positions[k]
+                        robot.setAngle(k,position,defaultSpeed)
+                        if not pressed[k]:
+                            window[k].update(value = position)
+                    if mode:
+                        replaying = False
+                        print('...replayed one')
+            window["Replayed"].update(value=str(replay),visible=(replay != -1))
+
+except serial.serialutil.SerialException:
+    print('serial line closed')
+ 
 window.close()
 del robot
 cameras.close()
