@@ -1,5 +1,10 @@
 Nico on Windows (Python 3.9 64bit)
 
+pip install opencv-contrib-python
+pip install requests
+pip install PySimpleGUI
+pip install beeply
+
 clone https://github.com/knowledgetechnologyuhh/pypot.git 
 install from \pypot\ by
 python setup.py install
@@ -9,11 +14,13 @@ clone https://github.com/knowledgetechnologyuhh/NICO-software.git
 nicomotion:
 install from \NICO-software\api\src\nicomotion\ by
 python setup.py install
-add to PATH which.exe from cygwin64
-add to PATH setserial.exe downloaded from github.com/andylucny/dummysetserial
+(if the 'use_2to3 is invalid' error appears apply pip install setuptools==58.0.0 prior to the installing nicomotion)
+#add to PATH which.exe from cygwin64
+#add to PATH setserial.exe downloaded from github.com/andylucny/dummysetserial
+set DeviceManage/Ports/Properties/PortSettings/Advanced/LatencyTimer 16->1
 in e.g. c:\Python39\Lib\site-packages\nicomotion-1.0-py3.9.egg\nicomotion\
-- comment out _adjust_port_latency (instead set DeviceManage/Ports/Properties/PortSettings/Advanced/LatencyTimer 16->1
 - patch nicomotion and pypot to 
+  - comment out _adjust_port_latency calling setserial
   - support RH6Hand (derived from RH7Hand by removing l_wrist_y and r_wrist_y)
   - avoid stucking the Eros logical board (hand) when ids are requested.
   in e.g. c:\Python39\Lib\site-packages\pypot-3.1.2-py3.9.egg\pypot\dynamixel\motor.py
@@ -27,6 +34,9 @@ in e.g. c:\Python39\Lib\site-packages\nicomotion-1.0-py3.9.egg\nicomotion\
 #nicoaudio:
 #install from \NICO-software\api\src\nicoaudio\ by
 #python setup.py install
+
+pip install six
+
 
 cd \NICO-software\api-doc\
 (pip install sphynx)

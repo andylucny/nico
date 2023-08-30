@@ -142,7 +142,7 @@ class NicoCameras:
     def close(self):
         self.stopped = True
 
-    def check(self,left,right): #TBD
+    def check(self,left,right): #TBD: binarize by 'good features to follow'
         return False # means OK
         #left_gray = cv2.cvtColor(left,cv2.COLOR_BGR2GRAY)
         #right_gray = cv2.cvtColor(right,cv2.COLOR_BGR2GRAY)
