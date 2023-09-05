@@ -85,9 +85,7 @@ class NicoCameras:
 
     def grabbing(self,id):
         print(f'grabbing thread {id} started')
-        camera = cv2.VideoCapture(id,cv2.CAP_DSHOW)
-        fps = 30 
-        camera.set(cv2.CAP_PROP_FPS,fps)
+        camera = cv2.VideoCapture(id,cv2.CAP_MSMF)
         fps = 0
         t0 = time.time()
         while True:
