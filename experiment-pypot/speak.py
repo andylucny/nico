@@ -1,6 +1,6 @@
 import pyttsx3
 
-def speak(text, language='sk'):
+def speak(text, language='en'):
     engine = pyttsx3.init()
     engine.setProperty('rate', 150)
     voices = engine.getProperty('voices')
@@ -10,3 +10,7 @@ def speak(text, language='sk'):
     print('speaking on <'+text+'>')
     engine.runAndWait()
     print('speaking off')
+
+if __name__ == "__main__":
+    speak('preparing, please, wait')
+    print('done')

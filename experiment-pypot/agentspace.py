@@ -6,7 +6,7 @@ from queue import Queue
 class Trigger(Enum):
     NORMAL = 0
     NAMES = 1
-    #NAMES_AND_VALUES = 2
+    NAMES_AND_VALUES = 2
     
 class Variable:
 
@@ -93,7 +93,7 @@ class Space:
                     if agent.stopped:
                         self.variables[name].deregister(agent,type)
                     else:
-                        agent.trigger(None if type == Trigger.NORMAL else name)
+                        agent.trigger(None if type == Trigger.NORMAL else name,None if type != Trigger.NAMES_AND_VALUES else value)
             
     def attach_trigger(self, name, agent, type=Trigger.NORMAL):
         with self.lock:
@@ -107,9 +107,9 @@ class Agent:
 
     def __init__(self):
         self.stopped = False
-        self.event = threading.Event()
         self.triggered_name = None
         self.timer = None
+        self.proxies = Queue()
         self.t = threading.Thread(name="agent", target=self.run)
         self.t.start()
         
@@ -124,12 +124,14 @@ class Agent:
         self.attach_timer(self.period)
         
     def receive(self):
-        self.event.wait()
-        self.event.clear()
+        self.triggered_name = self.proxies.get()
     
-    def trigger(self, name=None):
-        self.triggered_name = name
-        self.event.set()
+    def trigger(self, name=None, value=None):
+        if value is None:
+            if not name in self.proxies.queue:
+                self.proxies.put(name)
+        else:
+            self.proxies.put((name,value))
         
     def run(self):
         self.init()
@@ -210,4 +212,57 @@ if __name__ == "__main__":
     time.sleep(3)
     a2.stop()
     a3.stop()
+
+    class Agent4(Agent):
+        def init(self):
+            space.attach_trigger("a",self,Trigger.NAMES)
+            space.attach_trigger("b",self,Trigger.NAMES)
+        def senseSelectAct(self):
+            trigger = self.triggered()
+            if trigger == 'a':
+                a = space(default=0)['a']
+                print('a =',a)
+                space['b'] = a+1
+                time.sleep(2.0)
+                print('done')
+            elif trigger == 'b':
+                b = space(default=0)['b']
+                print('b =',b)
+
+    class Agent5(Agent):
+        def init(self):
+            space.attach_trigger("b",self,Trigger.NAMES)
+        def senseSelectAct(self):
+            trigger = self.triggered()
+            if trigger == 'b':
+                b = space(default=0)['b']
+                print('bb =',b)
+      
+    a4 = Agent4()
+    a5 = Agent5()
+    time.sleep(1)
+    print("1")
+    space['a'] = 2
+    time.sleep(4)
+    print("2")
+    space['a'] = 4
+    time.sleep(4)
+    a5.stop()
+    a4.stop()
     
+    class Agent6(Agent):
+        def init(self):
+            space.attach_trigger("c",self,Trigger.NAMES_AND_VALUES)
+            time.sleep(2)
+        def senseSelectAct(self):
+            name, value = self.triggered()
+            print(name, value)
+
+    a6 = Agent6()
+    space['c'] = 1
+    space['c'] = 2
+    space['c'] = 3
+    space['c'] = 4
+    space['c'] = 5
+    time.sleep(3)
+    a6.stop()

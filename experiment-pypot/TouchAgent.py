@@ -1,69 +1,89 @@
 from agentspace import Agent, space
-import numpy as np
-import cv2 as cv
-import os
-import time
 import pyautogui
+import pygame
+import time
+import ctypes
+import numpy as np
+import cv2
 
-def stopAllMotors(_robot):
-    for motor in _robot._robot.motors:
-        motor.goal_position = motor.present_position
-
+def clean():
+    screen.fill((0, 0, 0)) 
+    pygame.display.flip()
+    color_index = 0
+    image[:,:] = (80,80,80)
+    space['touchimage'] = image
+    
 class TouchAgent(Agent):
-
-    def __init__(self, robot):
-        self.robot = robot
-        super().__init__()
-        
-    def mouseHandler(self, event, x, y, flags, param):
-        radius = 15
-        if event == cv.EVENT_LBUTTONDOWN:
-            pass
-            #cv.circle(self.screen,(x,y),radius,(0,255,0),cv.FILLED)
-        elif event == cv.EVENT_LBUTTONUP:
-            cv.circle(self.screen,(x,y),radius,(0,0,255),cv.FILLED)
-        else:
-            pass
-            #cv.circle(self.screen,(x,y),radius,(0,255,0),cv.FILLED)
-        self.touch = True
-        
+            
     def init(self):
-
-        width, height = pyautogui.size()
-        cv.namedWindow("image",cv.WINDOW_NORMAL)
-        cv.setMouseCallback("image", self.mouseHandler)
-        self.screen = np.zeros((height,width,3),np.uint8)
-        self.touch = False
-        self.mouse = pyautogui.position()
-
-        while True:
-            if self.touch:
-                pyautogui.moveTo(self.mouse[0], self.mouse[1])
-                #pyautogui.drag(0,0,0.1,button='left')
-                self.touch = False
-            else:
-                mouse = pyautogui.position()
-                if mouse[0] < width:
-                    self.mouse = mouse
-            cv.imshow("image", self.screen)
-            key = cv.waitKey(10)
-            if key == 27:
-                break
-            elif key == 's':
-                stopAllMotors(self.robot)
-
-        cv.destroyAllWindows()
+        # create a Pygame window
+        global screen
+        screen = pygame.display.set_mode((2400, 1350), flags=pygame.NOFRAME, depth=0, display=1)
+        global image
+        image = np.zeros((1350,2400,3),np.uint8)
+        image[:,:] = (80,80,80)
+        #pygame.event.set_blocked(pygame.MOUSEMOTION)
+        #pygame.event.set_blocked(pygame.MOUSEBUTTONUP)
+        #pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
+        pygame.display.set_caption('NICOs touchscreen')
+        HWND = pygame.display.get_wm_info()['window']
+        GWL_EXSTYLE = -20
+        styles = ctypes.windll.user32.GetWindowLongA(HWND,GWL_EXSTYLE)
+        WS_EX_NOACTIVATE = 0x08000000
+        styles |= WS_EX_NOACTIVATE
+        ctypes.windll.user32.SetWindowLongA(HWND,GWL_EXSTYLE,styles)
+        screen_info = pygame.display.Info()
+        width, height = screen_info.current_w, screen_info.current_h # 
+        color_index = 0
+        colors = [ (255,0,0), (0,255,0), (0,255,255), (80,80,255) ] # Red, Green, Cyan, Light Blue
+        print('initialized')
         
+        # Run the event loop
+        #mouse = pyautogui.position()
+        quit = False
+        while not quit:
+            #time.sleep(0.1)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    print('quit event')
+                    quit = True
+                elif event.type == pygame.FINGERDOWN:
+                    # Process the first moment of touch
+                    circle_color = colors[color_index]
+                    color_index += 1
+                    if color_index == len(colors):
+                        color_index = 0
+                    circle_radius = 30
+                    circle_position = (int(width*event.x), int(height*event.y))
+                    print("touch detected at",circle_position)
+                    space['touch'] = circle_position
+                    pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
+                    pygame.display.flip()
+                    cv2.circle(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),cv2.FILLED)
+                    space['touchImage'] = image
+                    #pyautogui.moveTo(mouse[0], mouse[1])
+                    #for window in pyautogui.getAllWindows():  
+                    #    if "Experiment" in window.title:
+                    #        window.activate()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == 1073741912: # Numeric ENTER
+                        print('stop key pressed')
+                        space['stop'] = True
+                #else:
+                #    mouse = pyautogui.position()
+            pygame.display.flip()
+            
+        # quit Pygame
+        print('quiting')
+        pygame.quit()
+
     def senseSelectAct(self):
         pass
     
 if __name__ == "__main__":
+   
+    import os
+    def quit():
+        os._exit(0)
 
-    from nicomotion.Motion import Motion
-    motorConfig = './nico_humanoid_upper_rh7d_ukba.json'
-    robot = Motion(motorConfig=motorConfig)
-    
-    TouchAgent(robot)
-    motor = robot._robot.motors[0]
-    #motor.goto_position(50,duration=20,wait=False)
-    
+    TouchAgent()
