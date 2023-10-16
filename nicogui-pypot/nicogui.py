@@ -116,7 +116,7 @@ def addons_layout(id=20):
         ]
     ]
     layout.append([ sg.HSeparator() ])
-    texts = ["Neck left-right", "Neck up-down"]
+    texts = [dofs[-2], dofs[-1]]
     for i in range(2):
         key = dofs[id+i]
         minVal, maxVal, defVal = getRange(key)
