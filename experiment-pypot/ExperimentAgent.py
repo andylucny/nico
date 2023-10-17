@@ -6,6 +6,7 @@ import os
 from TouchAgent import clean
 from speak import speak
 import pyautogui
+from datetime import datetime
 
 motorConfig = './nico_humanoid_upper_rh7d_ukba.json'
 robot = Motion(motorConfig=motorConfig)
@@ -171,25 +172,24 @@ class ExperimentAgent(Agent):
         trigger = self.triggered()
         if trigger == "experiment":
             if space["experiment"]:
-                if self.state == 0:
-                    self.mouse = pyautogui.position()
-                    speak("Starting experiment...")
-                    time.sleep(1)
-                    space["button"] = False
-                    speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
-                    self.sample_index = np.random.randint(len(self.samples))
-                    self.posename = self.samples[self.sample_index]
-                    x = ord(self.posename[1])-ord('1')
-                    y = ord(self.posename[0])-ord('A')
-                    self.pose = poses[y][x]
-                    head = space(default=True)['head']
-                    if not head:
-                        self.pose = self.pose[:-2] + pose0[-2:]
-                    self.timestamp = time.time()
-                    setLeftArm(self.pose,self.duration)
-                    self.state = 1
-                else:
+                if self.state != 0:
                     self.ready()
+                self.mouse = pyautogui.position()
+                speak("Starting experiment...")
+                time.sleep(1)
+                space["button"] = False
+                speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
+                self.sample_index = np.random.randint(len(self.samples))
+                self.posename = self.samples[self.sample_index]
+                x = ord(self.posename[1])-ord('1')
+                y = ord(self.posename[0])-ord('A')
+                self.pose = poses[y][x]
+                head = space(default=True)['head']
+                if not head:
+                    self.pose = self.pose[:-2] + pose0[-2:]
+                self.timestamp = time.time()
+                setLeftArm(self.pose,self.duration)
+                self.state = 1
         elif trigger == "stop":
             if self.state == 1:
                 self.timeElapsed = time.time()-self.timestamp
@@ -216,7 +216,8 @@ class ExperimentAgent(Agent):
                 except FileExistsError: 
                     pass
                 with open("experiment/" + name + ".txt", "a") as f:
-                    f.write(f"{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.intendedTouch[0]},{self.intendedTouch[1]},{self.timeElapsed:1.3f}\n")
+                    date = str(datetime.now())
+                    f.write(f"{date},{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.intendedTouch[0]},{self.intendedTouch[1]},{self.timeElapsed:1.3f}\n")
                 speak("Data are recorded.")
                 time.sleep(0.5)
                 self.ready()

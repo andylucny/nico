@@ -66,7 +66,7 @@ class GuiAgent(Agent):
             window["humanImage"].update(data=human_imgbytes)
 
         window.close()
-        #self.stop()
+        Agent.stopAll()
         close()
         print('exiting')
         os._exit(0)

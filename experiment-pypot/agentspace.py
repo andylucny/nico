@@ -104,8 +104,15 @@ class Space:
 space = Space[""]
 
 class Agent:
+    allAgents = []
+    
+    def stopAll():
+        tmp = Agent.allAgents.copy()
+        for agent in tmp:
+            agent.stop()
 
     def __init__(self):
+        Agent.allAgents.append(self)
         self.stopped = False
         self.triggered_name = None
         self.timer = None
@@ -141,6 +148,7 @@ class Agent:
                 break
             self.senseSelectAct()
             self.triggered_name = None
+        del self.proxies
         
     def init(self): # to be overiden
         print('I am ready')
@@ -153,6 +161,7 @@ class Agent:
             self.timer.cancel()
         self.stopped = True
         self.trigger()
+        Agent.allAgents.remove(self)
         
     def triggered(self):
         return self.triggered_name
@@ -265,4 +274,16 @@ if __name__ == "__main__":
     space['c'] = 4
     space['c'] = 5
     time.sleep(3)
-    a6.stop()
+    #a6.stop()
+    
+    import os
+    class Agent7(Agent):
+        def init(self):
+            self.attach_timer(1.5)
+        def senseSelectAct(self):
+            print('exiting')
+            os._exit(0)
+    
+    #Agent7()
+    Agent.stopAll()
+    

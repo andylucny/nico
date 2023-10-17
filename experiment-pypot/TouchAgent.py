@@ -7,8 +7,11 @@ import numpy as np
 import cv2
 
 def clean():
-    screen.fill((0, 0, 0)) 
-    pygame.display.flip()
+    try:
+        screen.fill((0, 0, 0)) 
+        pygame.display.flip()
+    except:
+        pass
     color_index = 0
     image[:,:] = (80,80,80)
     space['touchimage'] = image
@@ -41,10 +44,11 @@ class TouchAgent(Agent):
         # Run the event loop
         #mouse = pyautogui.position()
         quit = False
+        pygame.time.set_timer(pygame.USEREVENT + 1, 500)
         while not quit:
             #time.sleep(0.1)
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT or self.stopped:
                     print('quit event')
                     quit = True
                 elif event.type == pygame.FINGERDOWN:
@@ -74,7 +78,7 @@ class TouchAgent(Agent):
             pygame.display.flip()
             
         # quit Pygame
-        print('quiting')
+        print('quiting pygame')
         pygame.quit()
 
     def senseSelectAct(self):

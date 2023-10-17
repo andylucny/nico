@@ -2,6 +2,7 @@ import os
 import numpy as np
 import cv2
 from agentspace import Agent, space, Trigger
+from datetime import datetime
 
 class RecorderAgent(Agent):
 
@@ -37,5 +38,6 @@ class RecorderAgent(Agent):
                 tr = cv2.resize(space(default=self.blank)['robotImage'],self.hsize)
                 bl = cv2.resize(space(default=self.blank)['touchImage'],self.hsize)
                 br = np.copy(self.blank)
+                cv2.putText(br,str(datetime.now()),(10,25),0,1.0,(255,255,255),1)
                 frame = cv2.vconcat([cv2.hconcat([tl,tr]),cv2.hconcat([bl,br])])
                 self.out.write(frame)
