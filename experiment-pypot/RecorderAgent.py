@@ -21,15 +21,15 @@ class RecorderAgent(Agent):
         experiment = space(default=False)['experiment']
         if self.triggered() == 'experiment':
             if experiment:
-                name = space['name']
+                name = space(default='xxx')['name']
                 if name != self.lastName:
                     if self.out is not None:
                         self.out.release()
                     try:
-                        os.mkdir("experiment/")
+                        os.mkdir("data/")
                     except FileExistsError: 
                         pass
-                    filename = "experiment/" + name + ".avi"
+                    filename = "data/" + name + ".avi"
                     self.out = cv2.VideoWriter()
                     self.out.open(filename,cv2.VideoWriter_fourcc('M','J','P','G'),self.fps,self.size)
         else:

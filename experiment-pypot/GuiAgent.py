@@ -32,6 +32,7 @@ class GuiAgent(Agent):
         ]
         window = sg.Window("Experiment", layout, finalize=True)
         window.bind("<Return>", "Stop")
+        window.bind("<Up>","Run")
         #blank = np.zeros((240,320,3),np.uint8)
         blank = np.zeros((480,640,3),np.uint8)
         head = True

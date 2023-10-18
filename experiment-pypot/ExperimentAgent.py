@@ -151,9 +151,12 @@ class ExperimentAgent(Agent):
         if self.mouse is not None:
             pyautogui.moveTo(self.mouse[0], self.mouse[1])
             self.mouse = None
-        for window in pyautogui.getAllWindows():  
-            if "Experiment" in window.title:
-                window.activate()
+        try:
+            for window in pyautogui.getAllWindows():  
+                if "Experiment" in window.title:
+                    window.activate()
+        except:
+            pass
         speak('Please enter your name and start the experiment by clicking Run')
 
     def init(self):
@@ -212,10 +215,10 @@ class ExperimentAgent(Agent):
                 time.sleep(self.duration+1.0)
                 name = space(default="xxx")["name"]
                 try:
-                    os.mkdir("experiment/")
+                    os.mkdir("data/")
                 except FileExistsError: 
                     pass
-                with open("experiment/" + name + ".txt", "a") as f:
+                with open("data/" + name + ".txt", "a") as f:
                     date = str(datetime.now())
                     f.write(f"{date},{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.intendedTouch[0]},{self.intendedTouch[1]},{self.timeElapsed:1.3f}\n")
                 speak("Data are recorded.")
