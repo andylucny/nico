@@ -73,6 +73,9 @@ class TouchAgent(Agent):
                     if event.key == 1073741912: # Numeric ENTER
                         print('stop key pressed')
                         space['stop'] = True
+                    elif event.key == 1073741917: # Numeric 5
+                        print('run key pressed')
+                        space['experiment'] = True
                 #else:
                 #    mouse = pyautogui.position()
             pygame.display.flip()

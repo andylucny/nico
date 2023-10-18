@@ -32,7 +32,8 @@ class GuiAgent(Agent):
         ]
         window = sg.Window("Experiment", layout, finalize=True)
         window.bind("<Return>", "Stop")
-        blank = np.zeros((240,320,3),np.uint8)
+        #blank = np.zeros((240,320,3),np.uint8)
+        blank = np.zeros((480,640,3),np.uint8)
         head = True
         while True:
             event, values = window.read(timeout=10)
@@ -59,10 +60,10 @@ class GuiAgent(Agent):
                     print("name",space["name"])
                     
             robot_img = space(default=blank)['robotImage']
-            robot_imgbytes = cv2.imencode(".png", cv2.resize(robot_img,(320,240)))[1].tobytes()
+            robot_imgbytes = cv2.imencode(".png", cv2.resize(robot_img,(blank.shape[1],blank.shape[0])))[1].tobytes()
             window["robotImage"].update(data=robot_imgbytes)
             human_img = space(default=blank)['humanImage']
-            human_imgbytes = cv2.imencode(".png", cv2.resize(human_img,(320,240)))[1].tobytes()
+            human_imgbytes = cv2.imencode(".png", cv2.resize(human_img,(blank.shape[1],blank.shape[0])))[1].tobytes()
             window["humanImage"].update(data=human_imgbytes)
 
         window.close()
