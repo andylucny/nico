@@ -40,7 +40,7 @@ class CameraAgent(Agent):
         self.camera = cv.VideoCapture(self.id,cv.CAP_DSHOW)
         #if nicoType in self.fullType:
         self.camera.set(cv.CAP_PROP_FPS,self.fps)
-        while True:
+        while not self.stopped:
             # Grab a frame
             ret, img = self.camera.read()
             if not ret:
@@ -50,6 +50,8 @@ class CameraAgent(Agent):
             
             # sample it onto blackboard
             space(validity=3.0/self.fps)[self.nameImage] = img
+            
+        self.camera.release()
  
     def senseSelectAct(self):
         pass
