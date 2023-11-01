@@ -219,10 +219,10 @@ class ExperimentAgent(Agent):
         print('Count:',self.count,'Max Count:',space(default=1)["MaxCount"])
         if self.count < space(default=1)["MaxCount"]:
             print("running automatically the next experiment")
-            self.count = 1
-            space["count"] = self.count
             space["experiment"] = True
         else:
+            self.count = 0
+            space["count"] = self.count
             speak('Please enter your name and start the experiment by clicking Run')
 
     def init(self):
@@ -232,7 +232,7 @@ class ExperimentAgent(Agent):
                 self.samples.append(f+g)
         self.duration = 4.0
         self.lastmode = 0
-        self.count = 1
+        self.count = 0
         self.lastName = ""
         self.mouse = None
         self.ready()
