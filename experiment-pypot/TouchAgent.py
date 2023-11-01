@@ -89,8 +89,11 @@ class TouchAgent(Agent):
                     color_index = 0
                 circle_radius = 30
                 circle_position = emulated
-                pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
-                pygame.display.flip()
+                if space(default=False)['ShowIntention']:
+                    pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
+                    pygame.display.flip()
+                cv2.circle(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),cv2.FILLED)                
+                space['touchImage'] = image
                 space['emulated'] = None
             time.sleep(0.025)
             

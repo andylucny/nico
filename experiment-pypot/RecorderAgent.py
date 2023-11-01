@@ -36,8 +36,11 @@ class RecorderAgent(Agent):
             if experiment:
                 tl = cv2.resize(space(default=self.blank)['humanImage'],self.hsize)
                 tr = cv2.resize(space(default=self.blank)['robotImage'],self.hsize)
-                bl = cv2.resize(space(default=self.blank)['touchImage'],self.hsize)
-                br = np.copy(self.blank)
-                cv2.putText(br,str(datetime.now()),(10,25),0,1.0,(255,255,255),1)
+                bl = cv2.resize(space(default=self.blank)['robotEye'],self.hsize) #np.copy(self.blank)
+                br = cv2.resize(space(default=self.blank)['touchImage'],self.hsize)
+                cv2.putText(br,str(datetime.now())[:22],(10,self.hsize[1]-15),0,1.0,(255,255,255),1)
+                count = space(default=0)["count"]
+                if count > 0:
+                    cv2.putText(br,'#'+str(count),(10,55),0,2.0,(255,255,255),3)
                 frame = cv2.vconcat([cv2.hconcat([tl,tr]),cv2.hconcat([bl,br])])
                 self.out.write(frame)

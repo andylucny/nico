@@ -22,14 +22,18 @@ from TouchAgent import TouchAgent
 from CameraAgent import CameraAgent
 from RecorderAgent import RecorderAgent
 
-GuiAgent()
+GuiAgent() # writes 'experiment', 'stop' reads 'humanImage', 'robotImage', 'robotEye', 'robotWideFOV'
 time.sleep(1)
-TouchAgent()
+TouchAgent() # writes 'touch', 'stop', 'experiment', 'touchImage' reads 'emulated'
 time.sleep(1)
 ExperimentAgent()
 time.sleep(1)
-CameraAgent('HD Pro Webcam C920',1,'humanImage',10)
+CameraAgent('HD Pro Webcam C920',1,'humanImage',fps=10)
 time.sleep(1)
-CameraAgent('HD Pro Webcam C920',0,'robotImage',10)
+CameraAgent('HD Pro Webcam C920',0,'robotImage',fps=10)
 time.sleep(1)
-RecorderAgent()
+CameraAgent('See3CAM_CU135',0,'robotEye',fps=10,zoom=350)
+time.sleep(1)
+CameraAgent('See3CAM_CU135',1,'robotWideFOV',fps=10,zoom=100)
+time.sleep(1)
+RecorderAgent() # reads 'humanImage', 'robotImage', 'robotEye', 'touchImage'

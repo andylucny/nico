@@ -1,6 +1,11 @@
 import pyttsx3
+from agentspace import space
 
-def speak(text, language='en'):
+def speak(text, language='en', unconditional=False):
+    if not unconditional:
+        if not space(default=False)['TellIstructions']:
+            print('speaking avoided')
+            return
     engine = pyttsx3.init()
     engine.setProperty('rate', 150)
     voices = engine.getProperty('voices')

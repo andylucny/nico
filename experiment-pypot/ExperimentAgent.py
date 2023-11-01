@@ -14,6 +14,10 @@ robot = Motion(motorConfig=motorConfig)
 def close():
     global robot
     try:
+        print('setting default pose of the robot')
+        setLeftArm(pose0[:-2])
+        time.sleep(1)
+        setDefaultPose()
         print('closing line')
         del robot
         print('line closed')
@@ -187,12 +191,20 @@ def globalCalib(duration=2.0):
 class ExperimentAgent(Agent):
 
     def ready(self):
-        setLeftArm(pose0,self.duration)
+        if self.stopped:
+            return
+        duration = self.duration if self.lastmode == 0 else self.duration*self.lastmode/100.0
+        duration *= 0.7 # speed up
+        setLeftArm(pose0,duration)
         speak('Preparing. Please, wait.')
-        time.sleep(self.duration)
+        time.sleep(duration)
+        if self.stopped:
+            return
         clean()
         self.state = 0
         space["experiment"] = False
+        if self.stopped:
+            return
         if self.mouse is not None:
             pyautogui.moveTo(self.mouse[0], self.mouse[1])
             self.mouse = None
@@ -202,14 +214,26 @@ class ExperimentAgent(Agent):
                     window.activate()
         except:
             pass
-        speak('Please enter your name and start the experiment by clicking Run')
+        if self.stopped:
+            return
+        print('Count:',self.count,'Max Count:',space(default=1)["MaxCount"])
+        if self.count < space(default=1)["MaxCount"]:
+            print("running automatically the next experiment")
+            self.count = 1
+            space["count"] = self.count
+            space["experiment"] = True
+        else:
+            speak('Please enter your name and start the experiment by clicking Run')
 
     def init(self):
         self.samples = []
         for f in ['A','B','C']:
             for g in ['1','2','3','4','5','6','7']:
                 self.samples.append(f+g)
-        self.duration = 2.0
+        self.duration = 4.0
+        self.lastmode = 0
+        self.count = 1
+        self.lastName = ""
         self.mouse = None
         self.ready()
         space.attach_trigger("experiment",self,Trigger.NAMES)
@@ -218,26 +242,49 @@ class ExperimentAgent(Agent):
         
     def senseSelectAct(self):
         trigger = self.triggered()
+        mode = space(default=40)["StopMode"]
+        self.duration = space(default=4)["Duration"]
         if trigger == "experiment":
-            if space["experiment"]:
+            if space(default=False)["experiment"]:
                 if self.state != 0:
                     self.ready()
                 self.mouse = pyautogui.position()
-                speak("Starting experiment...")
-                time.sleep(1)
+                name = space(default="xxx")["name"]
+                if name != self.lastName:
+                    self.count = 1
+                    self.lastName = name
+                else:
+                    self.count += 1
+                space["count"] = self.count
+                if space(default=False)['TellIstructions']:
+                    speak("Starting experiment...")
+                else:
+                    speak('hmm',unconditional=True)
                 space["button"] = False
-                speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
+                if mode == 0:
+                    time.sleep(1)
+                    speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
                 self.sample_index = np.random.randint(len(self.samples))
                 self.posename = self.samples[self.sample_index]
                 x = ord(self.posename[1])-ord('1')
                 y = ord(self.posename[0])-ord('A')
+                self.touch = touches[y][x]
+                space['emulated'] = self.touch
                 self.pose = poses[y][x]
                 head = space(default=True)['head']
                 if not head:
                     self.pose = self.pose[:-2] + pose0[-2:]
                 self.timestamp = time.time()
                 setLeftArm(self.pose,self.duration)
-                self.state = 1
+                self.lastmode = mode
+                if mode == 0:
+                    self.state = 1
+                else:
+                    self.timeElapsed = self.duration*mode/100.0
+                    time.sleep(self.timeElapsed)
+                    stopAllMotors()
+                    speak("The movement of my arm has been stopped after "+str(mode)+" percent, please touch the estimated touch point by your finger.")
+                    self.state = 2
         elif trigger == "stop":
             if self.state == 1:
                 self.timeElapsed = time.time()-self.timestamp
@@ -247,15 +294,25 @@ class ExperimentAgent(Agent):
             else:
                 self.ready()
         elif trigger == "touch":
+            record = False
             if self.state == 2:
                 self.estimatedTouch = space['touch']
                 time.sleep(0.5)
-                speak("Thank you. Let us look on my intention.")
+                if mode == 0:
+                    speak("Thank you. Let us look on my intention.")
+                    self.state = 3
+                else:
+                    self.intendedTouch = self.touch
+                    speak("Thank you.")
+                    record = True
                 setLeftArm(self.pose,self.duration-self.timeElapsed)
-                self.state = 3
             elif self.state == 3:
                 self.intendedTouch = space['touch']
                 speak("This was my intention.")
+                record = True
+            else:
+                self.ready()
+            if record:
                 setLeftArm(pose0,self.duration)
                 time.sleep(self.duration+1.0)
                 name = space(default="xxx")["name"]
@@ -265,11 +322,9 @@ class ExperimentAgent(Agent):
                     pass
                 with open("data/" + name + ".txt", "a") as f:
                     date = str(datetime.now())
-                    f.write(f"{date},{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.intendedTouch[0]},{self.intendedTouch[1]},{self.timeElapsed:1.3f}\n")
+                    f.write(f"{date},{self.count},{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.intendedTouch[0]},{self.intendedTouch[1]},{self.timeElapsed:1.3f}\n")
                 speak("Data are recorded.")
                 time.sleep(0.5)
-                self.ready()
-            else:
                 self.ready()
         
 if __name__ == "__main__":
