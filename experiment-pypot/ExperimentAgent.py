@@ -20,7 +20,8 @@ def close():
     except:
         pass
 
-leftArmDofs = ['l_shoulder_z','l_shoulder_y','l_arm_x','l_elbow_y','l_wrist_z','l_wrist_x','l_thumb_z','l_thumb_x','l_indexfinger_x','l_middlefingers_x','head_z','head_y']
+leftArmDofs = ['l_shoulder_z','l_shoulder_y','l_arm_x','l_elbow_y','l_wrist_z','l_wrist_x','l_thumb_z','l_thumb_x','l_indexfinger_x','l_middlefingers_x']
+headDofs = ['head_z','head_y']
 
 def enableTorque():
     for dof in leftArmDofs:
@@ -39,8 +40,20 @@ def getLeftArm():
         angles.append(angle)
     return angles
 
+def getHead():
+    angles = []
+    for dof in headDofs:
+        angle = robot.getAngle(dof)
+        angles.append(angle)
+    return angles
+
 def setLeftArm(angles,duration=2.0):
     for dof,angle in zip(leftArmDofs,angles):
+        motor = getattr(robot._robot, dof)
+        motor.goto_position(angle,duration=duration,wait=False)
+
+def setHead(angles,duration=2.0):
+    for dof,angle in zip(headDofs,angles):
         motor = getattr(robot._robot, dof)
         motor.goto_position(angle,duration=duration,wait=False)
 
@@ -80,6 +93,38 @@ posesC = [
 ]
 
 poses = [posesA, posesB, posesC]
+
+touchesA = [
+    (2064, 462),
+    (1675, 285),
+    (1369, 223),
+    (1079, 215),
+    (881, 233),
+    (556, 310),
+    (195, 454)
+]
+
+touchesB = [
+    (2100, 645),
+    (1794, 568),
+    (1596, 559),
+    (1247, 603),
+    (849, 588),
+    (554, 617),
+    (240, 697)
+]
+
+touchesC = [
+    (2040, 999),
+    (1827, 1089),
+    (1474, 1087),
+    (1166, 1009),
+    (857, 1001),
+    (619, 1073),
+    (344, 1032)
+]
+
+touches = [ touchesA, touchesB, touchesC ]
 
 def setDefaultPose(speed=0.04):
     allDofs = robot.getJointNames()
@@ -255,12 +300,40 @@ if __name__ == "__main__":
                 with open('record.txt','at') as f:
                     f.write(str([goal]+list(touch)+list(arm))[1:-1]+'\n')
     
-    SimpleExperimentAgent()
-    print('simple agent started')
+    #SimpleExperimentAgent()
+    #print('simple agent started')
     
-    time.sleep(2)
+    #time.sleep(2)
     #touch('B3')
     #globalTest()
     #calibtouch('A1')
-    globalCalib()
-    
+    #globalCalib()
+
+"""    
+p = 'B3'
+x = ord(p[1])-ord('1')
+y = ord(p[0])-ord('A')
+pose = poses[y][x]
+touch = touches[y][x]
+clean()
+space['emulated'] = touch
+duration = 1.0
+setHead(pose[-2:],duration)
+time.sleep(duration)
+duration = 4.0
+setLeftArm(pose[:-2],duration)
+time.sleep(0.8*duration)
+stopAllMotors()
+#
+duration = 2.0
+setLeftArm(pose0[:-2],duration)
+setHead(pose0[-2:],duration)
+#
+"""    
+
+"""
+for touchline in touches:
+    for touch in touchline:
+        space['emulated'] = touch
+        time.sleep(0.1)
+"""

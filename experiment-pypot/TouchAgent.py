@@ -81,6 +81,18 @@ class TouchAgent(Agent):
                 #else:
                 #    mouse = pyautogui.position()
             pygame.display.flip()
+            emulated = space['emulated']
+            if emulated is not None:
+                circle_color = colors[color_index]
+                color_index += 1
+                if color_index == len(colors):
+                    color_index = 0
+                circle_radius = 30
+                circle_position = emulated
+                pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
+                pygame.display.flip()
+                space['emulated'] = None
+            time.sleep(0.025)
             
         # quit Pygame
         print('quiting pygame')
