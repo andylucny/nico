@@ -217,7 +217,7 @@ class ExperimentAgent(Agent):
         if self.stopped:
             return
         print('Count:',self.count,'Max Count:',space(default=1)["MaxCount"])
-        if self.count < space(default=1)["MaxCount"]:
+        if self.count > 0 and self.count < space(default=1)["MaxCount"]:
             print("running automatically the next experiment")
             space["experiment"] = True
         else:

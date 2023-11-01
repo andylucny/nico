@@ -33,7 +33,7 @@ class RecorderAgent(Agent):
                     self.out = cv2.VideoWriter()
                     self.out.open(filename,cv2.VideoWriter_fourcc('M','J','P','G'),self.fps,self.size)
         else:
-            if experiment:
+            if experiment and (self.out is not None):
                 tl = cv2.resize(space(default=self.blank)['humanImage'],self.hsize)
                 tr = cv2.resize(space(default=self.blank)['robotImage'],self.hsize)
                 bl = cv2.resize(space(default=self.blank)['robotEye'],self.hsize) #np.copy(self.blank)

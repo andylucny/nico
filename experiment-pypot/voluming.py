@@ -63,6 +63,7 @@ def quit():
     os._exit(0)
 
 leftArmDofs = ['l_shoulder_z','l_shoulder_y','l_arm_x','l_elbow_y','l_wrist_z','l_wrist_x','l_thumb_z','l_thumb_x','l_indexfinger_x','l_middlefingers_x','head_z','head_y']
+rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y','r_wrist_z','r_wrist_x','r_thumb_z','r_thumb_x','r_indexfinger_x','r_middlefingers_x','head_z','head_y']
 
 def enableTorque():
     for dof in leftArmDofs:
@@ -81,8 +82,20 @@ def getLeftArm():
         angles.append(angle)
     return angles
 
+def getRightArm():
+    angles = []
+    for dof in rightArmDofs:
+        angle = robot.getAngle(dof)
+        angles.append(angle)
+    return angles
+
 def setLeftArm(angles,duration=2.0):
     for dof,angle in zip(leftArmDofs,angles):
+        motor = getattr(robot._robot, dof)
+        motor.goto_position(angle,duration=duration,wait=False)
+
+def setRightArm(angles,duration=2.0):
+    for dof,angle in zip(rightArmDofs,angles):
         motor = getattr(robot._robot, dof)
         motor.goto_position(angle,duration=duration,wait=False)
 
@@ -137,9 +150,9 @@ class StoppingAgent(Agent):
         #stopAllMotors()
         print('recording')
         print(space["touch"])
-        print(getLeftArm())
+        print(getRightArm())
 
-stopper = StoppingAgent()
+#stopper = StoppingAgent()
 
 c1 = getPose('C1')
 c2 = getPose('C2')
@@ -230,3 +243,15 @@ touchesC = [
 ]
 
 touches = [ touchesA, touchesB, touchesC ]
+
+def displayPose(p):
+    x = ord(p[1])-ord('1')
+    y = ord(p[0])-ord('A')
+    touch = touches[y][x]
+    space['ShowIntention'] = True
+    space['emulated'] = (2400 - touch[0],touch[1])
+
+#setRightArm(pose0)
+#displayPose('A1')
+#setRightArm(a1)
+
