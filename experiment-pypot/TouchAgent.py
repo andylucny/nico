@@ -111,3 +111,23 @@ if __name__ == "__main__":
         os._exit(0)
 
     TouchAgent()
+    
+    h=26.5
+    ho=8 #7.5
+    ph=1350
+    pw=2400
+    hb = 10
+    hd = hb/2
+
+    dy = int(hd*ph/h)
+    ty = int(ho*ph/h)
+    my = ty+dy
+    by = ty+2*dy
+
+    dx = dy
+    tx = (pw-4*dx)/2
+
+    for y in [ty,my,by]:
+        for x in [tx,tx+dx,tx+2*dx,tx+3*dx,tx+4*dx]:
+            pygame.draw.circle(screen, (255,0,0), (x,y), 30)
+

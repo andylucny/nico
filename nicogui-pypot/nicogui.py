@@ -212,7 +212,7 @@ def synchronizable(key,basekey):
     return (basekey.startswith('l_') and key.startswith('r_')) or (basekey.startswith('r_') and key.startswith('l_'))
     
 def cross(img):
-    ofs = 40
+    ofs = 0#40
     h, w = img.shape[:2]
     cv2.line(img,(w//2,0),(w//2,h-1),(0,0,255),3)
     cv2.line(img,(0,h//2+ofs),(w-1,h//2+ofs),(0,0,255),3)
