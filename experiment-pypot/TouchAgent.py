@@ -112,6 +112,8 @@ if __name__ == "__main__":
 
     TouchAgent()
     
+    time.sleep(3)
+    
     h=26.5
     ho=8 #7.5
     ph=1350
