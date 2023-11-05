@@ -21,43 +21,43 @@ class GuiAgent(Agent):
                 sg.Image(filename="", key="touchImage")
             ],
             [ 
-                sg.Text("Name", size=(13, 1)), 
-                sg.Input("", size=(25, 1), key="Name"), 
+                sg.Text("Name", size=(5, 1)), 
+                sg.Input("+++", size=(25, 1), key="Name"), 
+                sg.Text("Language:", size=(9, 1)), 
+                sg.Radio("EN", "Language:", True, size=(2, 1), key="Language-EN", enable_events=True), 
+                sg.Radio("SK", "Language:", False, size=(2, 1), key="Language-SK", enable_events=True), 
+                sg.Checkbox("Body language", default=False, key='BodyLanguage', enable_events=True),
             ],
             [ 
-                sg.Text("Show intention", size=(13, 1)), 
-                sg.Radio("Off", "ShowIntention", True, size=(8, 1), key="ShowIntention-off", enable_events=True), 
-                sg.Radio("On", "ShowIntention", False, size=(8, 1), key="ShowIntention-on", enable_events=True),
-                sg.Text("      ", size=(5, 1)), 
-                sg.Text("Tell instructions", size=(13, 1)), 
-                sg.Radio("Off", "TellIstructions", True, size=(8, 1), key="TellIstructions-off", enable_events=True), 
-                sg.Radio("On", "TellIstructions", False, size=(8, 1), key="TellIstructions-on", enable_events=True) 
+                sg.Checkbox("Show intention", default=False, key='ShowIntention', enable_events=True),
+                sg.Checkbox("Tell instructions", default=False, key='TellIstructions', enable_events=True),
+                sg.Checkbox("Complete touch", default=False, key='CompleteTouch', enable_events=True),
+                sg.Checkbox("Hmm", default=False, key='Hmm', enable_events=True),
+                sg.Text("Head:", size=(5, 1)), 
+                sg.Radio("off", "Head:", False, size=(2, 1), key="Head-off", enable_events=True), 
+                sg.Radio("congruent", "Head:", True, size=(8, 1), key="Head-congruent", enable_events=True), 
+                sg.Radio("disparate", "Head:", False, size=(8, 1), key="Head-disparate", enable_events=True), 
             ],
             [ 
-                sg.Text("Stop mode", size=(13, 1)), 
-                sg.Radio("Button", "StopMode", False, size=(8, 1), key="StopMode-button", enable_events=True), 
-                sg.Button("Stop", size=(8, 1)),
-                sg.Radio("40%", "StopMode", True, size=(8, 1), key="StopMode-40", enable_events=True),
-                sg.Radio("50%", "StopMode", False, size=(8, 1), key="StopMode-50", enable_events=True),
-                sg.Radio("60%", "StopMode", False, size=(8, 1), key="StopMode-60", enable_events=True),
-                sg.Radio("65%", "StopMode", False, size=(8, 1), key="StopMode-65", enable_events=True),
-                sg.Radio("80%", "StopMode", False, size=(8, 1), key="StopMode-80", enable_events=True)
-            ],
-            [ 
-                sg.Text("Head", size=(13, 1)), 
-                sg.Radio("Off", "Head", False, size=(8, 1), key="Head-off", enable_events=True), 
-                sg.Radio("On", "Head", True, size=(8, 1), key="Head-on", enable_events=True) 
-            ],
-            [
-                sg.Text("Duration", size=(8, 1), justification="left"),
-                sg.Slider((1,10), 4, 1, orientation="h", size=(20, 10), key='Duration', enable_events=True),
-                sg.Text("s", size=(2, 1), justification="left"),
+                sg.Text("Stop mode:", size=(9, 1)), 
+                sg.Radio("off", "StopMode:", False, size=(2, 1), key="StopMode-off", enable_events=True), 
+                sg.Radio("on button", "StopMode:", False, size=(7, 1), key="StopMode-button", enable_events=True), 
+                sg.Button("Stop", size=(7, 1)),
+                sg.Radio("at 40%", "StopMode:", True, size=(6, 1), key="StopMode-40", enable_events=True),
+                sg.Radio("at 50%", "StopMode:", False, size=(6, 1), key="StopMode-50", enable_events=True),
+                sg.Radio("at 60%", "StopMode:", False, size=(6, 1), key="StopMode-60", enable_events=True),
+                sg.Radio("at 65%", "StopMode:", False, size=(6, 1), key="StopMode-65", enable_events=True),
+                sg.Radio("at 80%", "StopMode:", False, size=(6, 1), key="StopMode-80", enable_events=True)
             ],
             [
                 sg.Slider((1,100), 1, 1, orientation="h", size=(20, 10), key='MaxCount', enable_events=True),
-                sg.Text("x", size=(2, 1), justification="left"),
-                sg.Button("Run", size=(10, 1)),
-                sg.Button("Exit", size=(10, 1))
+                sg.Text("x", size=(1, 1), justification="left"),
+                sg.Button("Run", size=(7, 1)),
+                sg.Text("", size=(1, 1)), 
+                sg.Text("Duration", size=(8, 1), justification="left"),
+                sg.Slider((1,10), 4, 1, orientation="h", size=(20, 10), key='Duration', enable_events=True),
+                sg.Text("s", size=(3, 1), justification="left"),
+                sg.Button("Exit", size=(7, 1))
             ],
         ]
         window = sg.Window("Experiment", layout, finalize=True)
@@ -74,22 +74,33 @@ class GuiAgent(Agent):
                 print(event)
             if event == "Exit" or event == sg.WIN_CLOSED:
                 break
-            elif event == "ShowIntention-off":
-                space["ShowIntention"] = False
-            elif event == "ShowIntention-on":
-                space["ShowIntention"] = True
-            elif event == "TellIstructions-off":
-                space["TellIstructions"] = False
-            elif event == "TellIstructions-on":
-                space["TellIstructions"] = True
+            elif event == "Language-EN":
+                space["language"] = "EN"
+            elif event == "Language-SK":
+                space["language"] = "SK"
+            elif event == "BodyLanguage":
+                space["BodyLanguage"] = values["BodyLanguage"]
+            elif event == "ShowIntention":
+                space["ShowIntention"] = values["ShowIntention"]
+            elif event == "TellIstructions":
+                space["TellIstructions"] = values["TellIstructions"]
+            elif event == "CompleteTouch":
+                space["CompleteTouch"] = values["CompleteTouch"]
+            elif event == "Hmm":
+                space["hmm"] = values["Hmm"]
             elif event.startswith("StopMode-"):
                 option = event[len("StopMode-"):]
-                percentage = int(option) if option != "button" else 0
+                percentage = -1 if option == "off" else 0 if option == "button" else int(option)
                 space["StopMode"] = percentage
             elif event == "Head-off":
                 space["head"] = False
-            elif event == "Head-on":
+                space["disparate"] = False
+            elif event == "Head-congruent":
                 space["head"] = True
+                space["disparate"] = False
+            elif event == "Head-disparate":
+                space["head"] = True
+                space["disparate"] = True
             elif event == "Run":
                 space["experiment"] = True
             elif event == "Stop":
@@ -150,12 +161,19 @@ if __name__ == "__main__":
         def init(self):
             space.attach_trigger("experiment",self,Trigger.NAMES)
             space.attach_trigger("head",self,Trigger.NAMES)
+            space.attach_trigger("disparate",self,Trigger.NAMES)
             space.attach_trigger("stop",self,Trigger.NAMES)
             space.attach_trigger("name",self,Trigger.NAMES)
+            space.attach_trigger("language",self,Trigger.NAMES)
+            space.attach_trigger("BodyLanguage",self,Trigger.NAMES)
+            space.attach_trigger("ShowIntention",self,Trigger.NAMES)
+            space.attach_trigger("TellIstructions",self,Trigger.NAMES)
+            space.attach_trigger("CompleteTouch",self,Trigger.NAMES)
+            space.attach_trigger("hmm",self,Trigger.NAMES)
         
         def senseSelectAct(self):
             name = self.triggered()
-            print('space',name,space[name] if name is not None else "")
+            print('space',name,space[name] if name is not None else "None")
 
     GuiAgent()
     MonitoringAgent()

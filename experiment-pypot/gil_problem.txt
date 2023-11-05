@@ -1,0 +1,19 @@
+when one of cameras is not connected, 
+python crashes on the GIL error
+
+>>> Fatal Python error: PyGILState_Release: thread state 0000026AF2911AD0 must be current when releasing
+Python runtime state: initialized
+
+Thread 0x000042d0 (most recent call first):
+  File "C:\Python39\lib\threading.py", line 316 in wait
+  File "C:\Python39\lib\threading.py", line 574 in wait
+  File "C:\Python39\lib\threading.py", line 1260 in run
+  File "C:\Python39\lib\threading.py", line 950 in _bootstrap_inner
+  File "C:\Python39\lib\threading.py", line 908 in _bootstrap
+
+Thread 0x00004454 (most recent call first):
+  File "C:\Python39\lib\threading.py", line 312 in wait
+  File "C:\Python39\lib\queue.py", line 171 in get
+  File "l:\github\nico\experiment-pypot\agentspace.py", line 134 in receive
+
+It is probably caused by a mistake inside the OpenCV library

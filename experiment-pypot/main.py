@@ -32,8 +32,8 @@ CameraAgent('HD Pro Webcam C920',1,'humanImage',fps=10)
 time.sleep(1)
 CameraAgent('HD Pro Webcam C920',0,'robotImage',fps=10)
 time.sleep(1)
-CameraAgent('See3CAM_CU135',0,'robotEye',fps=10,zoom=350)
+CameraAgent('See3CAM_CU135',1,'robotEye',fps=10,zoom=350) # right eye
 time.sleep(1)
-CameraAgent('See3CAM_CU135',1,'robotWideFOV',fps=10,zoom=100)
+CameraAgent('See3CAM_CU135',0,'robotWideFOV',fps=10,zoom=100) # left eye
 time.sleep(1)
 RecorderAgent() # reads 'humanImage', 'robotImage', 'robotEye', 'touchImage'

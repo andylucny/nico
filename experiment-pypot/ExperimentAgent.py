@@ -18,6 +18,9 @@ def close():
         setLeftArm(pose0[:-2])
         time.sleep(1)
         setDefaultPose()
+    except:
+        pass
+    try:
         print('closing line')
         del robot
         print('line closed')
@@ -193,7 +196,7 @@ class ExperimentAgent(Agent):
     def ready(self):
         if self.stopped:
             return
-        duration = self.duration if self.lastmode == 0 else self.duration*self.lastmode/100.0
+        duration = self.duration if self.lastmode <= 0 else self.duration*self.lastmode/100.0
         duration *= 0.7 # speed up
         setLeftArm(pose0,duration)
         speak('Preparing. Please, wait.')
@@ -249,7 +252,7 @@ class ExperimentAgent(Agent):
                 if self.state != 0:
                     self.ready()
                 self.mouse = pyautogui.position()
-                name = space(default="xxx")["name"]
+                name = space(default="+++")["name"]
                 if name != self.lastName:
                     self.count = 1
                     self.lastName = name
@@ -259,7 +262,8 @@ class ExperimentAgent(Agent):
                 if space(default=False)['TellIstructions']:
                     speak("Starting experiment...")
                 else:
-                    speak('hmm',unconditional=True)
+                    if space(default=False)['hmm']:
+                        speak('hmm',unconditional=True)
                 space["button"] = False
                 if mode == 0:
                     time.sleep(1)
@@ -279,6 +283,10 @@ class ExperimentAgent(Agent):
                 self.lastmode = mode
                 if mode == 0:
                     self.state = 1
+                elif mode == -1:
+                    self.timeElapsed = self.duration
+                    self.estimatedTouch = (-1,-1)
+                    self.state = 3
                 else:
                     self.timeElapsed = self.duration*mode/100.0
                     time.sleep(self.timeElapsed)
@@ -298,14 +306,15 @@ class ExperimentAgent(Agent):
             if self.state == 2:
                 self.estimatedTouch = space['touch']
                 time.sleep(0.5)
-                if mode == 0:
+                # mode != -1 here
+                if space(default=False)['CompleteTouch']:
                     speak("Thank you. Let us look on my intention.")
+                    setLeftArm(self.pose,self.duration-self.timeElapsed)
                     self.state = 3
                 else:
                     self.intendedTouch = self.touch
                     speak("Thank you.")
                     record = True
-                setLeftArm(self.pose,self.duration-self.timeElapsed)
             elif self.state == 3:
                 self.intendedTouch = space['touch']
                 speak("This was my intention.")
@@ -315,7 +324,7 @@ class ExperimentAgent(Agent):
             if record:
                 setLeftArm(pose0,self.duration)
                 time.sleep(self.duration+1.0)
-                name = space(default="xxx")["name"]
+                name = space(default="+++")["name"]
                 try:
                     os.mkdir("data/")
                 except FileExistsError: 
