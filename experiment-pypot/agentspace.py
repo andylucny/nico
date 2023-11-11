@@ -149,6 +149,7 @@ class Agent:
             self.senseSelectAct()
             self.triggered_name = None
         del self.proxies
+        print('stopping agent',str(self.__class__)[8:-2])
         
     def init(self): # to be overiden
         print('I am ready')
@@ -160,7 +161,6 @@ class Agent:
         if self.timer is not None:
             self.timer.cancel()
         self.stopped = True
-        print('stopping agent',str(self.__class__)[8:-2])
         self.trigger()
         Agent.allAgents.remove(self)
         
