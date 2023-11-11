@@ -171,9 +171,15 @@ def touch(p,duration=2.0):
     x = ord(p[1])-ord('1')
     y = ord(p[0])-ord('A')
     pose = poses[y][x]
-    setLeftArm(pose,duration)
+    if space(default=False)["arm"]:
+        setLeftArm(pose,duration)
+    else:
+        setRightArm(pose,duration)
     time.sleep(duration+0.2) 
-    setLeftArm(pose0,duration)
+    if space(default=False)["arm"]:
+        setLeftArm(pose0,duration)
+    else:
+        setRightArm(pose0,duration)
     time.sleep(duration)
 
 def globalTest(duration=2.0):
@@ -191,12 +197,18 @@ def calibtouch(p,duration=2.0):
     x = ord(p[1])-ord('1')
     y = ord(p[0])-ord('A')
     pose = poses[y][x]
-    setLeftArm(pose,duration)
+    if space(default=False)["arm"]:
+        setLeftArm(pose,duration)
+    else:
+        setRightArm(pose,duration)
     space['stop'] = False
     print('press enter')
     while not space(default=False)['stop']:
         time.sleep(0.2)
-    setLeftArm(pose0,duration)
+    if space(default=False)["arm"]:
+        setLeftArm(pose0,duration)
+    else:
+        setRightArm(pose0,duration)    
     time.sleep(duration)
     print('done')
 

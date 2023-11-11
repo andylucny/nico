@@ -160,7 +160,7 @@ class Agent:
         if self.timer is not None:
             self.timer.cancel()
         self.stopped = True
-        print('stopping agent',str(this.__class__)[8:-2])
+        print('stopping agent',str(self.__class__)[8:-2])
         self.trigger()
         Agent.allAgents.remove(self)
         
