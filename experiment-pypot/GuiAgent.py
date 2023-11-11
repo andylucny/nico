@@ -27,11 +27,9 @@ class GuiAgent(Agent):
                 sg.Radio("EN", "Language:", True, size=(2, 1), key="Language-EN", enable_events=True), 
                 sg.Radio("SK", "Language:", False, size=(2, 1), key="Language-SK", enable_events=True), 
                 sg.Checkbox("Body language", default=False, key='BodyLanguage', enable_events=True),
-            ],
-            [
                 sg.Text("Arm:", size=(5, 1)), 
                 sg.Radio("left", "Arm:", False, size=(2, 1), key="Arm-left", enable_events=True), 
-                sg.Radio("right", "Arm:", True, size=(2, 1), key="Arm-right", enable_events=True), 
+                sg.Radio("right", "Arm:", True, size=(3, 1), key="Arm-right", enable_events=True), 
             ],
             [ 
                 sg.Checkbox("Show intention", default=False, key='ShowIntention', enable_events=True),
