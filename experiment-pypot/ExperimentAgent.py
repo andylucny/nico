@@ -34,9 +34,13 @@ headDofs = ['head_z','head_y']
 def enableTorque():
     for dof in leftArmDofs:
         robot.enableTorque(dof)
+    for dof in rightArmDofs:
+        robot.enableTorque(dof)
 
 def disableTorque():
     for dof in leftArmDofs:
+        robot.disableTorque(dof)
+    for dof in rightArmDofs:
         robot.disableTorque(dof)
 
 enableTorque()
@@ -80,7 +84,7 @@ def setHead(angles,duration=2.0):
 pose0 = [-5.93, 24.13, 22.11, 62.2, 62.29, 40.22, 9.98, 0.04, -180.0, 166.02, 1.1, -1.45] #
 # test
 # setRightArm(pose0)
-# print(getLeftArm())
+# print(getRightArm())
 
 posesA = [
     [49.44, 44.36, 10.41, 129, 150.1, 159.78, 0.3, 0.04, -180.0, 165.4, -23, -28],
@@ -154,7 +158,7 @@ def setDefaultPose(speed=0.04):
     time.sleep(3.0)
     
 setDefaultPose()
-setLeftArm(pose0)
+setRightArm(pose0)
 
 def stopAllMotors():
     for motor in robot._robot.motors:

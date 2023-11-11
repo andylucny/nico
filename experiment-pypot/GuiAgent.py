@@ -110,9 +110,9 @@ class GuiAgent(Agent):
                 space["head"] = True
                 space["disparate"] = True
             elif event == "Arm-left":
-                space["arm"] = False
-            elif event == "Arm-right":
                 space["arm"] = True
+            elif event == "Arm-right":
+                space["arm"] = False
             elif event == "Run":
                 space["experiment"] = True
             elif event == "Stop":
