@@ -215,7 +215,7 @@ class ExperimentAgent(Agent):
             return
         duration = self.duration if self.lastmode <= 0 else self.duration*self.lastmode/100.0
         duration *= 0.7 # speed up
-        if self.rightHand:
+        if self.leftArm:
             setLeftArm(pose0,duration)
         else:
             setRightArm(pose0,duration)
@@ -255,6 +255,7 @@ class ExperimentAgent(Agent):
                 self.samples.append(f+g)
         self.duration = 4.0
         self.lastmode = 0
+        self.leftArm = False
         self.count = 0
         self.lastName = ""
         self.mouse = None
@@ -269,7 +270,7 @@ class ExperimentAgent(Agent):
         self.duration = space(default=4)["Duration"]
         if trigger == "experiment":
             if space(default=False)["experiment"]:
-                self.rightHand = space(default=False)["arm"]
+                self.leftArm = space(default=False)["arm"]
                 if self.state != 0:
                     self.ready()
                 self.mouse = pyautogui.position()
@@ -300,7 +301,7 @@ class ExperimentAgent(Agent):
                 if not head:
                     self.pose = self.pose[:-2] + pose0[-2:]
                 self.timestamp = time.time()
-                if self.rightHand:
+                if self.leftArm:
                     setLeftArm(self.pose,self.duration)
                 else:
                     setRightArm(self.pose,self.duration)
@@ -333,7 +334,7 @@ class ExperimentAgent(Agent):
                 # mode != -1 here
                 if space(default=False)['CompleteTouch']:
                     speak("Thank you. Let us look on my intention.")
-                    if self.rightHand:
+                    if self.leftArm:
                         setLeftArm(self.pose,self.duration-self.timeElapsed)
                     else:
                         setRightArm(self.pose,self.duration-self.timeElapsed)
@@ -349,7 +350,7 @@ class ExperimentAgent(Agent):
             else:
                 self.ready()
             if record:
-                if self.rightHand:
+                if self.leftArm:
                     setLeftArm(pose0,self.duration)
                 else:
                     setRightArm(pose0,self.duration)
