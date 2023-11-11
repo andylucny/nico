@@ -20,7 +20,7 @@ class CameraAgent(Agent):
     def __init__(self, type, order, nameImage, fps=30, zoom=350):
         self.type = type
         self.fullType = type
-        self.id = 0
+        self.id = -1
         for id, dev in enumerate(getCameraDevices()):
             if type in dev:
                 if order == 0:
@@ -33,6 +33,9 @@ class CameraAgent(Agent):
         super().__init__()
         
     def init(self):
+        if self.id == -1:
+            self.stop()
+            return
         nicoType = 'See3CAM_CU135'
         if nicoType in self.fullType:
             setCameraControls(self.id,{'zoom_absolute':self.zoom,'tilt_absolute':0,'pan_absolute':0})

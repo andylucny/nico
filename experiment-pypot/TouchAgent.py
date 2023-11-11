@@ -46,7 +46,6 @@ class TouchAgent(Agent):
         quit = False
         pygame.time.set_timer(pygame.USEREVENT + 1, 500)
         while not quit:
-            #time.sleep(0.1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or self.stopped:
                     print('quit event')
@@ -76,8 +75,8 @@ class TouchAgent(Agent):
                     elif event.key ==  1073741920: # Numeric arrow up
                         print('run key pressed')
                         space['experiment'] = True
-                    #else:
-                    #    print('key',event.key)
+                    else:
+                        print('key',event.key)
                 #else:
                 #    mouse = pyautogui.position()
             pygame.display.flip()
@@ -115,10 +114,10 @@ if __name__ == "__main__":
     time.sleep(3)
     
     h=26.5
-    ho=8 #7.5
+    ho=5.5 #7.5
     ph=1350
     pw=2400
-    hb = 10
+    hb = 9
     hd = hb/2
 
     dy = int(hd*ph/h)
@@ -128,8 +127,10 @@ if __name__ == "__main__":
 
     dx = dy
     tx = (pw-4*dx)/2
-
+    counter = 1
     for y in [ty,my,by]:
         for x in [tx,tx+dx,tx+2*dx,tx+3*dx,tx+4*dx]:
-            pygame.draw.circle(screen, (255,0,0), (x,y), 30)
+            if (counter % 2) == 0:
+                pygame.draw.circle(screen, (255,0,0), (x,y), 30)
+            counter +=1
 

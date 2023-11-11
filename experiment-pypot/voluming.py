@@ -68,9 +68,13 @@ rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y','r_wrist_z',
 def enableTorque():
     for dof in leftArmDofs:
         robot.enableTorque(dof)
+    for dof in rightArmDofs:
+        robot.enableTorque(dof)
 
 def disableTorque():
     for dof in leftArmDofs:
+        robot.disableTorque(dof)
+    for dof in rightArmDofs:
         robot.disableTorque(dof)
 
 enableTorque()
@@ -135,24 +139,23 @@ def stopAllMotors():
     for motor in robot._robot.motors:
         motor.goal_position = motor.present_position
 
-from TouchAgent import TouchAgent
+from TouchAgent import TouchAgent, clean
 TouchAgent()
 
 from agentspace import Agent, space, Trigger
 
 class StoppingAgent(Agent):
-      
     def init(self):
         space.attach_trigger("touch",self,Trigger.NAMES)
-    
     def senseSelectAct(self):
         #print('stopping motors')
-        #stopAllMotors()
-        print('recording')
-        print(space["touch"])
-        print(getRightArm())
+        stopAllMotors()
+        #print('recording')
+        #print(space["touch"])
+        angles = getRightArm()
+        print('***',angles[0],angles[1],angles[3],'***',space["touch"])
 
-#stopper = StoppingAgent()
+stopper = StoppingAgent()
 
 c1 = getPose('C1')
 c2 = getPose('C2')
@@ -255,3 +258,37 @@ def displayPose(p):
 #displayPose('A1')
 #setRightArm(a1)
 
+arm1 = 40.0
+arm2 = 50.0
+elbow = 90.0
+
+def get():
+    pos = getRightArm()
+    print(pos)
+    return pos
+
+def set():
+    global arm1, arm2, elbow
+    a = [arm1, arm2, 24.0, elbow, 155.0, 140.0, -120.0, 0.0, -150.0, 180.0,]
+    setRightArm(a)
+
+set()
+
+"""
+def calculate(d):
+    l = np.sqrt(d**2+22**2)
+    fi = 20.15*np.pi/180
+    np.arctan(d/22)
+"""
+
+def measure(arm2_):
+    global arm1, arm2, elbow
+    arm2 = arm2_
+    elbow = 80
+    set()
+    time.sleep(3)
+    elbow = 180
+    set()
+    time.sleep(3)
+    elbow = 80
+    set()

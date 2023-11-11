@@ -7,8 +7,9 @@ import cv2
 import numpy as np
 from beeply.notes import beeps
 from nicomotion.Motion import Motion
-from nicocameras import NicoCameras
+from nicocameras import NicoCameras, image_shift_xy
 from nicodummy import DummyRobot
+import serial
 
 def quit():
     os._exit(0)
@@ -26,7 +27,7 @@ except:
     robot = DummyRobot()
     print('motors are not operational')
 
-defaultSpeed = 0.04
+defaultSpeed = 0.04*0.5
 
 def enabledTorque(jointName):
     global robot
@@ -212,10 +213,17 @@ def synchronizable(key,basekey):
     return (basekey.startswith('l_') and key.startswith('r_')) or (basekey.startswith('r_') and key.startswith('l_'))
     
 def cross(img):
-    ofs = 0#40
     h, w = img.shape[:2]
-    cv2.line(img,(w//2,0),(w//2,h-1),(0,0,255),3)
-    cv2.line(img,(0,h//2+ofs),(w-1,h//2+ofs),(0,0,255),3)
+    cv2.line(img,(w//2,0),(w//2,h-1),(0,0,255),1)
+    cv2.line(img,(0,h//2),(w-1,h//2),(0,0,255),1)
+    
+def crossAddons(img,d,s):
+    h, w = img.shape[:2]
+    dx, dy = d
+    dx = int(dx//2*s)
+    dy = int(dy//2*s)
+    cv2.line(img,(w//2+dx,h//3),(w//2+dx,2*h//3),(0,255,0),1)    
+    cv2.line(img,(w//3,h//2+dy),(2*w//3,h//2+dy),(0,255,0),1)
 
 try:
 
@@ -525,7 +533,11 @@ try:
         right_view = right_frame
         if right_view is not None and concerned['RightCross']:
             right_view = np.copy(right_frame)
-            cross(right_view)        
+            cross(right_view) 
+        if left_view is not None and concerned['LeftCross'] and right_view is not None and concerned['RightCross']:
+            dxy = image_shift_xy(left_view,right_view)
+            crossAddons(left_view,dxy,-1)
+            crossAddons(right_view,dxy,+1)
         if left_frame is not None and left_fps > 1: 
             left_imgbytes = cv2.imencode(".png", cv2.resize(left_view,(320,240)))[1].tobytes()
             window["Left-EYE"].update(data=left_imgbytes)

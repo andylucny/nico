@@ -28,6 +28,7 @@ def close():
         pass
 
 leftArmDofs = ['l_shoulder_z','l_shoulder_y','l_arm_x','l_elbow_y','l_wrist_z','l_wrist_x','l_thumb_z','l_thumb_x','l_indexfinger_x','l_middlefingers_x']
+rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y','r_wrist_z','r_wrist_x','r_thumb_z','r_thumb_x','r_indexfinger_x','r_middlefingers_x']
 headDofs = ['head_z','head_y']
 
 def enableTorque():
@@ -47,6 +48,13 @@ def getLeftArm():
         angles.append(angle)
     return angles
 
+def getRightArm():
+    angles = []
+    for dof in rightArmDofs:
+        angle = robot.getAngle(dof)
+        angles.append(angle)
+    return angles
+
 def getHead():
     angles = []
     for dof in headDofs:
@@ -59,6 +67,11 @@ def setLeftArm(angles,duration=2.0):
         motor = getattr(robot._robot, dof)
         motor.goto_position(angle,duration=duration,wait=False)
 
+def setRightArm(angles,duration=2.0):
+    for dof,angle in zip(rightArmDofs,angles):
+        motor = getattr(robot._robot, dof)
+        motor.goto_position(angle,duration=duration,wait=False)
+
 def setHead(angles,duration=2.0):
     for dof,angle in zip(headDofs,angles):
         motor = getattr(robot._robot, dof)
@@ -66,7 +79,7 @@ def setHead(angles,duration=2.0):
 
 pose0 = [-5.93, 24.13, 22.11, 62.2, 62.29, 40.22, 9.98, 0.04, -180.0, 166.02, 1.1, -1.45] #
 # test
-# setLeftArm(pose0)
+# setRightArm(pose0)
 # print(getLeftArm())
 
 posesA = [

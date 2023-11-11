@@ -151,3 +151,55 @@ class NicoCameras:
         #right_src = 1.0 - np.float32(right_gray)/255.0
         #ret, confidence = cv2.phaseCorrelate(left_src,right_src)
         #return confidence > 0.1 and ret[0] < -1.0
+
+
+"""
+def image_shift_xy(left,right):
+    left_gray = cv2.cvtColor(left,cv2.COLOR_BGR2GRAY)
+    right_gray = cv2.cvtColor(right,cv2.COLOR_BGR2GRAY)
+    left_src = 1.0 - np.float32(left_gray)/255.0
+    right_src = 1.0 - np.float32(right_gray)/255.0
+    ret, confidence = cv2.phaseCorrelate(left_src,right_src)
+    return ret
+"""
+
+def getTranslationX(affineTransform):
+    return affineTransform[0,2]
+
+def getTranslationY(affineTransform):
+    return affineTransform[1,2]
+    
+def image_shift_xy(left,right):
+    """    
+    left_gray = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
+    right_gray = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
+    
+    left_points = cv2.goodFeaturesToTrack(left_gray,maxCorners=200,qualityLevel=0.01,minDistance=30,blockSize=3)
+    
+    right_points, status, err = cv2.calcOpticalFlowPyrLK(left_gray, right_gray, left_points, None) 
+
+    indices = np.where(status==1)[0]
+    warp_matrix, _ = cv2.estimateAffine2D(left_points[indices], right_points[indices], method=cv2.LMEDS)
+    """
+    
+    #left_crop = left[left.shape[0]//4:3*left.shape[0]//4,left.shape[1]//4:3*left.shape[1]//4]
+    #right_crop = right[right.shape[0]//4:3*right.shape[0]//4,right.shape[1]//4:3*right.shape[1]//4]
+    left_gray = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
+    right_gray = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)    
+    warp_matrix = np.array([[1,0,0],[0,1,0]],np.float32)
+    try:
+        # use ECC
+        warp_mode = cv2.MOTION_AFFINE
+        number_of_iterations = 200
+        termination_eps = 1e-10
+        criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, number_of_iterations,  termination_eps)
+        (cc, warp_matrix) = cv2.findTransformECC(left_gray, left_gray, warp_matrix, warp_mode, criteria, inputMask=None, gaussFiltSize=5)
+    except Exception as ee:
+        # print('ECC diverged:', ee)
+        pass
+    
+    dx = getTranslationX(warp_matrix)
+    dy = getTranslationY(warp_matrix)
+    
+    return (dx,dy)
+    
