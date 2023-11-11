@@ -69,10 +69,13 @@ class GuiAgent(Agent):
         #blank = np.zeros((480,640,3),np.uint8)
         lastExperimentState = False
         while True:
+            if self.stopped:
+                break
             event, values = window.read(timeout=10)
             if event != "__TIMEOUT__":
                 print(event)
             if event == "Exit" or event == sg.WIN_CLOSED:
+                Agent.stopAll()
                 break
             elif event == "Language-EN":
                 space["language"] = "EN"
@@ -147,7 +150,6 @@ class GuiAgent(Agent):
                 lastExperimentState = experimentState
 
         window.close()
-        Agent.stopAll()
         close()
         print('exiting')
         os._exit(0)

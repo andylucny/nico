@@ -1,11 +1,9 @@
 import time
 import os
 import signal
-from ExperimentAgent import close
 
 def quit():
-    close()
-    os._exit(0)
+    Agent.stopAll()
 
 # exit on ctrl-c
 def signal_handler(signal, frame):
@@ -21,6 +19,7 @@ from GuiAgent import GuiAgent
 from TouchAgent import TouchAgent
 from CameraAgent import CameraAgent
 from RecorderAgent import RecorderAgent
+from SafetyAgent import SafetyAgent
 
 GuiAgent() # writes 'experiment', 'stop' reads 'humanImage', 'robotImage', 'robotEye', 'robotWideFOV'
 time.sleep(1)
@@ -37,3 +36,5 @@ time.sleep(1)
 CameraAgent('See3CAM_CU135',0,'robotWideFOV',fps=10,zoom=100) # left eye
 time.sleep(1)
 RecorderAgent() # reads 'humanImage', 'robotImage', 'robotEye', 'touchImage'
+time.sleep(1)
+SafetyAgent()
