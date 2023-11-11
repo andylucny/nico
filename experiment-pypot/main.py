@@ -2,9 +2,12 @@ import time
 import os
 import signal
 from agentspace import Agent, space
+from ExperimentAgent import close
 
 def quit():
-    Agent.stopAll()
+    #Agent.stopAll()
+    close()
+    os._exit(0)
 
 # exit on ctrl-c
 def signal_handler(signal, frame):
