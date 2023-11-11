@@ -1,6 +1,7 @@
 import time
 import os
 import signal
+from agentspace import Agent, space
 
 def quit():
     Agent.stopAll()

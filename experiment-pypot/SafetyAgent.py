@@ -4,7 +4,7 @@
 import keyboard
 from agentspace import Agent, space
 
-class SafetyButtonAgent(Agent):
+class SafetyAgent(Agent):
 
     def init(self):
         while True:
