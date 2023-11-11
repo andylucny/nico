@@ -15,7 +15,10 @@ def close():
     global robot
     try:
         print('setting default pose of the robot')
-        setLeftArm(pose0[:-2])
+        if space(default=False)["arm"]:
+            setLeftArm(pose0[:-2])
+        else:
+            setRightArm(pose0[:-2])
         time.sleep(1)
         setDefaultPose()
     except:
