@@ -211,7 +211,10 @@ class ExperimentAgent(Agent):
             return
         duration = self.duration if self.lastmode <= 0 else self.duration*self.lastmode/100.0
         duration *= 0.7 # speed up
-        setLeftArm(pose0,duration)
+        if self.rightHand:
+            setLeftArm(pose0,duration)
+        else:
+            setRightArm(pose0,duration)
         speak('Preparing. Please, wait.')
         time.sleep(duration)
         if self.stopped:
@@ -262,6 +265,7 @@ class ExperimentAgent(Agent):
         self.duration = space(default=4)["Duration"]
         if trigger == "experiment":
             if space(default=False)["experiment"]:
+                self.rightHand = space(default=False)["arm"]
                 if self.state != 0:
                     self.ready()
                 self.mouse = pyautogui.position()
@@ -292,7 +296,10 @@ class ExperimentAgent(Agent):
                 if not head:
                     self.pose = self.pose[:-2] + pose0[-2:]
                 self.timestamp = time.time()
-                setLeftArm(self.pose,self.duration)
+                if self.rightHand:
+                    setLeftArm(self.pose,self.duration)
+                else:
+                    setRightArm(self.pose,self.duration)
                 self.lastmode = mode
                 if mode == 0:
                     self.state = 1
@@ -322,7 +329,10 @@ class ExperimentAgent(Agent):
                 # mode != -1 here
                 if space(default=False)['CompleteTouch']:
                     speak("Thank you. Let us look on my intention.")
-                    setLeftArm(self.pose,self.duration-self.timeElapsed)
+                    if self.rightHand:
+                        setLeftArm(self.pose,self.duration-self.timeElapsed)
+                    else:
+                        setRightArm(self.pose,self.duration-self.timeElapsed)
                     self.state = 3
                 else:
                     self.intendedTouch = self.touch
@@ -335,7 +345,10 @@ class ExperimentAgent(Agent):
             else:
                 self.ready()
             if record:
-                setLeftArm(pose0,self.duration)
+                if self.rightHand:
+                    setLeftArm(pose0,self.duration)
+                else:
+                    setRightArm(pose0,self.duration)
                 time.sleep(self.duration+1.0)
                 name = space(default="+++")["name"]
                 try:
@@ -359,7 +372,7 @@ if __name__ == "__main__":
     from TouchAgent import TouchAgent
     TouchAgent()
     stopAllMotors()
-    setLeftArm(pose0)
+    setRightArm(pose0)
     
     class SimpleExperimentAgent(Agent):
 
@@ -371,7 +384,7 @@ if __name__ == "__main__":
                 print('save')
                 stopAllMotors()
                 time.sleep(0.5)
-                arm = getLeftArm()
+                arm = getRightArm()
                 touch = space['touch']
                 goal = space['goal']
                 with open('record.txt','at') as f:
@@ -398,12 +411,12 @@ duration = 1.0
 setHead(pose[-2:],duration)
 time.sleep(duration)
 duration = 4.0
-setLeftArm(pose[:-2],duration)
+setRightArm(pose[:-2],duration)
 time.sleep(0.8*duration)
 stopAllMotors()
 #
 duration = 2.0
-setLeftArm(pose0[:-2],duration)
+setRightArm(pose0[:-2],duration)
 setHead(pose0[-2:],duration)
 #
 """    

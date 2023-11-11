@@ -28,6 +28,11 @@ class GuiAgent(Agent):
                 sg.Radio("SK", "Language:", False, size=(2, 1), key="Language-SK", enable_events=True), 
                 sg.Checkbox("Body language", default=False, key='BodyLanguage', enable_events=True),
             ],
+            [
+                sg.Text("Arm:", size=(5, 1)), 
+                sg.Radio("left", "Arm:", False, size=(2, 1), key="Arm-left", enable_events=True), 
+                sg.Radio("right", "Arm:", True, size=(2, 1), key="Arm-right", enable_events=True), 
+            ],
             [ 
                 sg.Checkbox("Show intention", default=False, key='ShowIntention', enable_events=True),
                 sg.Checkbox("Tell instructions", default=False, key='TellIstructions', enable_events=True),
@@ -104,6 +109,10 @@ class GuiAgent(Agent):
             elif event == "Head-disparate":
                 space["head"] = True
                 space["disparate"] = True
+            elif event == "Arm-left":
+                space["arm"] = False
+            elif event == "Arm-right":
+                space["arm"] = True
             elif event == "Run":
                 space["experiment"] = True
             elif event == "Stop":
