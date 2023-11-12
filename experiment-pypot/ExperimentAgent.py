@@ -35,15 +35,11 @@ rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y','r_wrist_z',
 headDofs = ['head_z','head_y']
 
 def enableTorque():
-    for dof in leftArmDofs:
-        robot.enableTorque(dof)
-    for dof in rightArmDofs:
+    for dof in leftArmDofs+rightArmDofs+headDofs:
         robot.enableTorque(dof)
 
 def disableTorque():
-    for dof in leftArmDofs:
-        robot.disableTorque(dof)
-    for dof in rightArmDofs:
+    for dof in leftArmDofs+rightArmDofs+headDofs:
         robot.disableTorque(dof)
 
 enableTorque()
