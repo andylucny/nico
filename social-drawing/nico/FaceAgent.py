@@ -1,6 +1,6 @@
 import numpy as np
 import cv2 as cv 
-from agentspace import Agent, space
+from nico.agentspace import Agent, space
 import time
 
 class FaceAgent(Agent):

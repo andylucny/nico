@@ -1,15 +1,16 @@
 import os
 
-from agentspace import Agent, space, Trigger
+from nico.agentspace import Agent, space, Trigger
 
-from CameraAgent import CameraAgent
-from PerceptionAgent import PerceptionAgent
-from FaceAgent import FaceAgent
-from ActionAgent import ActionAgent
-from ControlAgent import ControlAgent
-from ViewerAgent import ViewerAgent
+from nico.CameraAgent import CameraAgent
+from nico.PerceptionAgent import PerceptionAgent
+from nico.FaceAgent import FaceAgent
+from nico.ActionAgent import ActionAgent
+from nico.ControlAgent import ControlAgent
+from nico.ViewerAgent import ViewerAgent
+from nico.RandomAgent import RandomAgent
 
-from download import download_all
+from nico.download import download_all
 download_all()
 
 from nicomotion.Motion import Motion
@@ -18,7 +19,7 @@ try:
     robot = Motion(motorConfig=motorConfig)
 except:
     print('motors are simulated')
-    from nicodummy import DummyRobot
+    from nico.nicodummy import DummyRobot
     robot = DummyRobot()
 
 import signal
@@ -60,13 +61,13 @@ def setDefaultPose(speed=0.04):
 
 def startup():
     enableTorque()
-    righteye = CameraAgent('See3CAM_CU135',1,'camera',fps=10,zoom=350) # right eye
+    righteye = CameraAgent('See3CAM_CU135',0,'camera',fps=10,zoom=350) # right eye
     time.sleep(1)
     dummy = righteye.stopped
     if dummy:
         camera = CameraAgent('',0,'camera')
     else:
-        lefteye = CameraAgent('HD Pro Webcam C920',0,'wide camera',fps=10) # left eye
+        lefteye = CameraAgent('See3CAM_CU135',1,'wide camera',fps=10,zoom=170) # left eye
     time.sleep(1)
     PerceptionAgent('camera','features','points','point2') # dino model pointing to 6 points, one preferred 
     time.sleep(1)
@@ -74,18 +75,25 @@ def startup():
     time.sleep(1)
     ActionAgent(robot,'point') # turn to shown objects
     time.sleep(1)
-    ControlAgent('points','face point','point') # point selection 
+    ControlAgent('points','face point','point',followCloseObjects=False) # point selection 
+    time.sleep(1)
+    RandomAgent(robot)
     time.sleep(1)
     ViewerAgent('camera','wide camera','points','face point','point') # view image from camera
 
-def setmode(mode): # 0 .. look to the touchscreen, 1 .. look to face, 2 .. look around
+def setmode(mode): # 0 .. look to the touchscreen, 1 .. look to face, 2 .. look around, 3 .. random look
     space['mode'] = mode
     if mode == 0:
         space['point'] = None
         robot.setAngle("head_z",0.0,0.05)
         robot.setAngle("head_y",-40.0,0.05)
+    elif mode == 3:
+        space['point'] = None
+        robot.setAngle("head_z",-40.0,0.02)
+        robot.setAngle("head_y",-10.0,0.02)
 
 if __name__ == "__main__":
+
     startup()
     print('looking on touchscreen')
     setmode(0)

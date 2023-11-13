@@ -1,5 +1,5 @@
 import cv2 as cv
-from agentspace import Agent, space
+from nico.agentspace import Agent, space
 
 import subprocess
 

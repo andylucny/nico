@@ -1,4 +1,4 @@
-from agentspace import Agent, space
+from nico.agentspace import Agent, space
 import numpy as np
 import onnxruntime as ort
 import cv2 as cv

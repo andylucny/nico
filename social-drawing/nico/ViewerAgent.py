@@ -1,5 +1,5 @@
 import numpy as np
-from agentspace import Agent, space
+from nico.agentspace import Agent, space
 import cv2 as cv
 import time
 
