@@ -11,25 +11,28 @@ class RandomAgent(Agent):
     def init(self):
         self.robot.setAngle("head_z",0.0,0.05)
         self.robot.setAngle("head_y",0.0,0.05)
-        time.sleep(2.0)
+        #time.sleep(2.0)
         self.attach_timer(1.0)
 
     def senseSelectAct(self):
-        if space(default=0)['mode'] != 3:
+        mode = space(default=0)['mode']
+        if mode != 3:
+        #if space(default=0)['mode'] != 3:
             return
         
-        if np.random.uniform(0,1) > 0.7:
-            if np.random.uniform(0,1) < 0.5:
-                head_x = np.random.uniform(30,80)
-            else:
-                head_x = np.random.uniform(-80,-30)
-            head_y = np.random.uniform(-10,10)
-            print('head_x:',head_x,'head_y:',head_y)
+        if np.random.uniform(0,1) > 0.8:
+            #if np.random.uniform(0,1) < 0.5:
+            #    head_x = np.random.uniform(30,60)
+            #else:
+                #head_x = np.random.uniform(-60,-30)
+            head_x = np.random.uniform(40, 70)
+            head_y = np.random.uniform(-20,20)
+            #print('head_x:',head_x,'head_y:',head_y)
         
-            speed = 0.02
+            speed = 0.04
             self.robot.setAngle("head_z",head_x,speed)
             self.robot.setAngle("head_y",head_y,speed)
-        else:
-            print('waiting')
+        #else:
+        #    print('waiting')
         
         

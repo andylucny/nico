@@ -89,8 +89,8 @@ def setmode(mode): # 0 .. look to the touchscreen, 1 .. look to face, 2 .. look 
         robot.setAngle("head_y",-40.0,0.05)
     elif mode == 3:
         space['point'] = None
-        robot.setAngle("head_z",-40.0,0.02)
-        robot.setAngle("head_y",-10.0,0.02)
+        robot.setAngle("head_z",50.0,0.02)
+        robot.setAngle("head_y",30.0,0.02)
 
 if __name__ == "__main__":
 
