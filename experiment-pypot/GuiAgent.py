@@ -26,16 +26,13 @@ class GuiAgent(Agent):
                 sg.Text("Language:", size=(9, 1)), 
                 sg.Radio("EN", "Language:", True, size=(2, 1), key="Language-EN", enable_events=True), 
                 sg.Radio("SK", "Language:", False, size=(2, 1), key="Language-SK", enable_events=True), 
-                sg.Checkbox("Body language", default=False, key='BodyLanguage', enable_events=True),
-                sg.Text("Arm:", size=(3, 1)), 
-                sg.Radio("left", "Arm:", False, size=(2, 1), key="Arm-left", enable_events=True), 
-                sg.Radio("right", "Arm:", True, size=(4, 1), key="Arm-right", enable_events=True), 
+                sg.Checkbox("Eye contact", default=True, key='EyeBodyLanguage', enable_events=True)
             ],
             [ 
                 sg.Checkbox("Show intention", default=False, key='ShowIntention', enable_events=True),
                 sg.Checkbox("Tell instructions", default=False, key='TellIstructions', enable_events=True),
                 sg.Checkbox("Complete touch", default=False, key='CompleteTouch', enable_events=True),
-                sg.Checkbox("Hmm", default=False, key='Hmm', enable_events=True),
+                sg.Checkbox("Hide touch", default=False, key='Hide', enable_events=True),
                 sg.Text("Head:", size=(5, 1)), 
                 sg.Radio("off", "Head:", False, size=(2, 1), key="Head-off", enable_events=True), 
                 sg.Radio("congruent", "Head:", True, size=(8, 1), key="Head-congruent", enable_events=True), 
@@ -81,9 +78,9 @@ class GuiAgent(Agent):
                 Agent.stopAll()
                 break
             elif event == "Language-EN":
-                space["language"] = "EN"
+                space["language"] = "en"
             elif event == "Language-SK":
-                space["language"] = "SK"
+                space["language"] = "sk"
             elif event == "BodyLanguage":
                 space["BodyLanguage"] = values["BodyLanguage"]
             elif event == "ShowIntention":
@@ -92,11 +89,11 @@ class GuiAgent(Agent):
                 space["TellIstructions"] = values["TellIstructions"]
             elif event == "CompleteTouch":
                 space["CompleteTouch"] = values["CompleteTouch"]
-            elif event == "Hmm":
-                space["hmm"] = values["Hmm"]
+            elif event == "Hide":
+                space["hide"] = values["Hide"]
             elif event.startswith("StopMode-"):
                 option = event[len("StopMode-"):]
-                percentage = -1 if option == "off" else 0 if option == "button" else int(option)
+                percentage = 100 if option == "off" else 0 if option == "button" else int(option)
                 space["StopMode"] = percentage
             elif event == "Head-off":
                 space["head"] = False
@@ -107,10 +104,6 @@ class GuiAgent(Agent):
             elif event == "Head-disparate":
                 space["head"] = True
                 space["disparate"] = True
-            elif event == "Arm-left":
-                space["arm"] = True
-            elif event == "Arm-right":
-                space["arm"] = False
             elif event == "Run":
                 space["experiment"] = True
             elif event == "Stop":
@@ -178,7 +171,7 @@ if __name__ == "__main__":
             space.attach_trigger("ShowIntention",self,Trigger.NAMES)
             space.attach_trigger("TellIstructions",self,Trigger.NAMES)
             space.attach_trigger("CompleteTouch",self,Trigger.NAMES)
-            space.attach_trigger("hmm",self,Trigger.NAMES)
+            space.attach_trigger("hide",self,Trigger.NAMES)
         
         def senseSelectAct(self):
             name = self.triggered()

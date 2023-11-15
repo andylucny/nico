@@ -527,6 +527,9 @@ try:
         left_frame, right_frame = cameras.read()
         left_fps, right_fps = cameras.fps()
         left_view = left_frame
+        dxy = None
+        if left_view is not None and concerned['LeftCross'] and right_view is not None and concerned['RightCross']:
+            dxy = image_shift_xy(left_view,right_view)
         if left_view is not None and concerned['LeftCross']:
             left_view = np.copy(left_frame)
             cross(left_view)
@@ -534,8 +537,7 @@ try:
         if right_view is not None and concerned['RightCross']:
             right_view = np.copy(right_frame)
             cross(right_view) 
-        if left_view is not None and concerned['LeftCross'] and right_view is not None and concerned['RightCross']:
-            dxy = image_shift_xy(left_view,right_view)
+        if dxy is not None:
             crossAddons(left_view,dxy,-1)
             crossAddons(right_view,dxy,+1)
         if left_frame is not None and left_fps > 1: 

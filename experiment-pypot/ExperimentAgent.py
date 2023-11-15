@@ -11,14 +11,14 @@ from datetime import datetime
 motorConfig = './nico_humanoid_upper_rh7d_ukba.json'
 robot = Motion(motorConfig=motorConfig)
 
+animations_path = './final_position'
+
 def close():
+    space["stop"] = True
     global robot
     try:
         print('setting default pose of the robot')
-        if space(default=False)["arm"]:
-            setLeftArm(pose0[:-2])
-        else:
-            setRightArm(pose0[:-2])
+        playAnimationEnd(home1)
         time.sleep(1)
         setDefaultPose()
     except:
@@ -44,20 +44,6 @@ def disableTorque():
 
 enableTorque()
 
-def getLeftArm():
-    angles = []
-    for dof in leftArmDofs:
-        angle = robot.getAngle(dof)
-        angles.append(angle)
-    return angles
-
-def getRightArm():
-    angles = []
-    for dof in rightArmDofs:
-        angle = robot.getAngle(dof)
-        angles.append(angle)
-    return angles
-
 def getHead():
     angles = []
     for dof in headDofs:
@@ -65,90 +51,62 @@ def getHead():
         angles.append(angle)
     return angles
 
-def setLeftArm(angles,duration=2.0):
-    for dof,angle in zip(leftArmDofs,angles):
-        motor = getattr(robot._robot, dof)
-        motor.goto_position(angle,duration=duration,wait=False)
-
-def setRightArm(angles,duration=2.0):
-    for dof,angle in zip(rightArmDofs,angles):
-        motor = getattr(robot._robot, dof)
-        motor.goto_position(angle,duration=duration,wait=False)
+def changeHead(angles, speed=0.04):
+    for dof,angle in zip(headDofs,angles):
+        robot.changeAngle(dof,angle,speed)
 
 def setHead(angles,duration=2.0):
     for dof,angle in zip(headDofs,angles):
         motor = getattr(robot._robot, dof)
         motor.goto_position(angle,duration=duration,wait=False)
 
-pose0 = [-5.93, 24.13, 22.11, 62.2, 62.29, 40.22, 9.98, 0.04, -180.0, 166.02, 1.1, -1.45] #
-# test
-# setRightArm(pose0)
-# print(getRightArm())
+def loadAnimation(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        concerned_dofs = eval(lines[0])
+        recorded_poses = []
+        for line in lines[1:]:
+            recorded_pose = eval(line[:-1])
+            recorded_poses.append(recorded_pose)
+        return (concerned_dofs,recorded_poses)
+    raise(BaseException(filename+" does not exist"))
 
-posesA = [
-    [49.44, 44.36, 10.41, 129, 150.1, 159.78, 0.3, 0.04, -180.0, 165.4, -23, -28],
-    [40.96, 38.55, 11.56, 123.2, 153.14, 139.83, -4.0, 0.04, -180.0, 161.45, -16, -28],
-    [32.49, 32.74, 12.7, 118.46, 156.17, 119.88, -8.3, 0.04, -180.0, 157.5, -6, -29],
-    [24.57, 32.99, 12.66, 116.64, 154.83, 129.68, -6.28, 0.04, -180.0, 160.6, 0, -29],
-    [20.53, 23.69, 15.52, 112, 158.99, 85.67, -12.62, 0.04, -180.0, 153.54, 7, -29],
-    [8.18, 27.43, 13.76, 110.07, 156.52, 119.52, -8.57, 0.04, -180.0, 159.74, 19, -29],
-    [-4.18, 31.17, 12.01, 110.03, 154.06, 153.36, -4.53, 0.04, -180.0, 165.93, 30, -29]
-]
+def loadAnimations(path):
+    global touches, home1, home2, animations
+    touches = np.loadtxt(path+'/touches.txt')
+    touches = [ tuple(touch.astype(int)) for touch in touches ]
+    animations = []
+    for i, _ in enumerate(touches):
+        recorded_poses = []
+        filename = path+'/p'+str(i+1)+'.txt'
+        animation = loadAnimation(filename)
+        animations.append(animation)
+    home1 = loadAnimation(path+'/home1.txt')
+    home2 = loadAnimation(path+'/home2.txt')
 
-posesB = [
-    [56.58, 31.68, 13.76, 112, 155.12, 150.02, -9.36, 0.04, -180.0, 157.41, -29, -33],
-    [47.87, 21.58, 14.11, 103.43, 155.12, 148.18, -2.15, 0.04, -180.0, 161.1, -18, -32],
-    [40.48, 16.84, 13.14, 99, 152.48, 165.58, 5.14, 0.04, -180.0, 164.7, -18.59, -29.23],
-    [31.6, 10.42, 15.43, 88.4, 154.07, 167.69, 9.98, 0.04, -180.0, 163.38, -4.97, -33.54],
-    [17.19, 9.1, 15.25, 87.52, 152.75, 167.69, 9.98, 0.04, -180.0, 164.7, 11.91, -31.87], 
-    [6.73, 10.51, 15.43, 88.75, 154.07, 165.58, 5.67, 0.04, -180.0, 164.7, 18.86, -33.98],
-    [-4.53, 12.09, 15.52, 90.50999999999999, 155.38, 157.14, 1.36, 0.04, -180.0, 164.7, 25.45, -36.09]
-]
+loadAnimations(path=animations_path)
 
-posesC = [
-    [63.25, 10.42, 15.52, 88.4, 154.07, 176.48, 4.0, 0.04, -180.0, 164.7, -30.64, -33.54],
-    [58.24, -0.31, 14.29, 77.49, 151.08, 167.69, 9.98, 0.04, -180.0, 164.7, -23.6, -37.76],
-    [46.46, -9.63, 15.69, 67.65, 153.71, 172.09, 9.98, 0.04, -180.0, 163.38, -13, -35.12],
-    [31.52, -10.68, 15.87, 66.77, 154.86, 171.38, 9.98, 0.04, -180.0, 164.0, 2.68, -32.84],
-    [16.92, -10.86, 16.22, 66.42, 156.0, 176.48, 9.98, 0.04, -180.0, 164.7, 16, -30.81],
-    [6.46, -13.32, 18.07, 65, 156.0, 176.48, 9.98, 0.04, -180.0, 164.18, 25.19, -32.84],
-    [-4.88, -6.99, 19.03, 70.99, 156.7, 160.92, 7.25, 0.04, -180.0, 163.47, 34.77, -32.04]
-]
+def playAnimation(animation,deltaTime=0.01,percentage=100,offset=0):
+    concerned_dofs, recorded_poses = animation
+    defaultSpeed = 0.04*0.5
+    for i, pose in enumerate(recorded_poses):
+        if i < offset:
+            continue
+        for dof, angle in zip(concerned_dofs,pose):
+            robot.setAngle(dof,angle,defaultSpeed)
+        time.sleep(deltaTime)
+        if space(default=False)["stop"]:
+            return i
+        if i*100/len(recorded_poses) >= percentage:
+            return i
+    return len(recorded_poses)
 
-poses = [posesA, posesB, posesC]
-
-touchesA = [
-    (2064, 462),
-    (1675, 285),
-    (1369, 223),
-    (1079, 215),
-    (881, 233),
-    (556, 310),
-    (195, 454)
-]
-
-touchesB = [
-    (2100, 645),
-    (1794, 568),
-    (1596, 559),
-    (1247, 603),
-    (849, 588),
-    (554, 617),
-    (240, 697)
-]
-
-touchesC = [
-    (2040, 999),
-    (1827, 1089),
-    (1474, 1087),
-    (1166, 1009),
-    (857, 1001),
-    (619, 1073),
-    (344, 1032)
-]
-
-touches = [ touchesA, touchesB, touchesC ]
-
+def playAnimationEnd(animation,speed=0.04):
+    concerned_dofs, recorded_poses = animation
+    pose = recorded_poses[-1]
+    for dof, angle in zip(concerned_dofs,pose):
+        robot.setAngle(dof,angle,speed)
+        
 def setDefaultPose(speed=0.04):
     allDofs = robot.getJointNames()
     poseBase = [1.19, -35.38, -6.81, -20.35, 33.54, 71.52, -6.81, -20.35, 33.54, 71.52, -74.51, 163.3, -15.96, -49.98, -180.0, -180.0, -74.51, 163.3, -15.96, -49.98, -180.0, -180.0] #
@@ -156,67 +114,28 @@ def setDefaultPose(speed=0.04):
         robot.setAngle(dof,angle,speed)
     time.sleep(3.0)
     
-setDefaultPose()
-setRightArm(pose0)
-
 def stopAllMotors():
     for motor in robot._robot.motors:
         motor.goal_position = motor.present_position
 
-def touch(p,duration=2.0):
-    x = ord(p[1])-ord('1')
-    y = ord(p[0])-ord('A')
-    pose = poses[y][x]
-    if space(default=False)["arm"]:
-        setLeftArm(pose,duration)
-    else:
-        setRightArm(pose,duration)
-    time.sleep(duration+0.2) 
-    if space(default=False)["arm"]:
-        setLeftArm(pose0,duration)
-    else:
-        setRightArm(pose0,duration)
-    time.sleep(duration)
+setDefaultPose()
 
-def globalTest(duration=2.0):
-    for f in ['A','B','C']:
-        for g in ['1','2','3','4','5','6','7']:
-            print('touching',f+g)
-            touch(f+g,duration)
-            time.sleep(1)
+def touch(i,back=False): # i = 1 .. 7
+    playAnimationEnd(home1)
+    time.sleep(3)
+    playAnimationEnd(home2)
+    time.sleep(1)
+    playAnimation(animations[i-1])
+    if back:
+        time.sleep(1.5)
+        playAnimationEnd(home1)
+        time.sleep(3)
 
-def calibtouch(p,duration=2.0):
-    space['stop'] = False
-    print('press enter')
-    while not space(default=False)['stop']:
-        time.sleep(0.2)
-    x = ord(p[1])-ord('1')
-    y = ord(p[0])-ord('A')
-    pose = poses[y][x]
-    if space(default=False)["arm"]:
-        setLeftArm(pose,duration)
-    else:
-        setRightArm(pose,duration)
-    space['stop'] = False
-    print('press enter')
-    while not space(default=False)['stop']:
-        time.sleep(0.2)
-    if space(default=False)["arm"]:
-        setLeftArm(pose0,duration)
-    else:
-        setRightArm(pose0,duration)    
-    time.sleep(duration)
-    print('done')
+def globalTest():
+    for i in range(7):
+        touch(i)
 
-def globalCalib(duration=2.0):
-    for f in ['A','B','C']:
-        for g in ['1','2','3','4','5','6','7']:
-            print('calib',f+g)
-            space('goal',f+g)
-            calibtouch(f+g,duration)
-            time.sleep(1)
-
-#touch('B1')
+#touch(1)
 #globalTest()
 
 class ExperimentAgent(Agent):
@@ -226,10 +145,7 @@ class ExperimentAgent(Agent):
             return
         duration = self.duration if self.lastmode <= 0 else self.duration*self.lastmode/100.0
         duration *= 0.7 # speed up
-        if self.leftArm:
-            setLeftArm(pose0,duration)
-        else:
-            setRightArm(pose0,duration)
+        playAnimationEnd(home1, speed = 0.06)
         speak('Preparing. Please, wait.')
         time.sleep(duration)
         if self.stopped:
@@ -266,7 +182,6 @@ class ExperimentAgent(Agent):
                 self.samples.append(f+g)
         self.duration = 4.0
         self.lastmode = 0
-        self.leftArm = False
         self.count = 0
         self.lastName = ""
         self.mouse = None
@@ -281,7 +196,6 @@ class ExperimentAgent(Agent):
         self.duration = space(default=4)["Duration"]
         if trigger == "experiment":
             if space(default=False)["experiment"]:
-                self.leftArm = space(default=False)["arm"]
                 if self.state != 0:
                     self.ready()
                 self.mouse = pyautogui.position()
@@ -294,78 +208,49 @@ class ExperimentAgent(Agent):
                 space["count"] = self.count
                 if space(default=False)['TellIstructions']:
                     speak("Starting experiment...")
-                else:
-                    if space(default=False)['hmm']:
-                        speak('hmm',unconditional=True)
-                space["button"] = False
+                playAnimationEnd(home2)
+                time.sleep(1)
                 if mode == 0:
                     time.sleep(1)
                     speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
-                self.sample_index = np.random.randint(len(self.samples))
-                self.posename = self.samples[self.sample_index]
-                x = ord(self.posename[1])-ord('1')
-                y = ord(self.posename[0])-ord('A')
-                self.touch = touches[y][x]
+                self.sample_index = np.random.randint(len(touches))
+                self.posename = str(self.sample_index+1)
+                print("SELECTED POINT No.",self.posename)
+                self.touch = touches[self.sample_index]
                 space['emulated'] = self.touch
-                self.pose = poses[y][x]
-                head = space(default=True)['head']
-                if not head:
-                    self.pose = self.pose[:-2] + pose0[-2:]
+                self.headMode = space(default=True)['head']
+                if self.headMode:
+                    self.head = [0,-30]
+                else:
+                    self.head = [0,0]
+                setHead(self.head)
+                time.sleep(1)
+                self.animation = animations[self.sample_index]
                 self.timestamp = time.time()
-                if self.leftArm:
-                    setLeftArm(self.pose,self.duration)
-                else:
-                    setRightArm(self.pose,self.duration)
+                space["stop"] = False
                 self.lastmode = mode
-                if mode == 0:
-                    self.state = 1
-                elif mode == -1:
-                    self.timeElapsed = self.duration
-                    self.estimatedTouch = (-1,-1)
-                    self.state = 3
-                else:
-                    self.timeElapsed = self.duration*mode/100.0
-                    time.sleep(self.timeElapsed)
-                    stopAllMotors()
-                    speak("The movement of my arm has been stopped after "+str(mode)+" percent, please touch the estimated touch point by your finger.")
-                    self.state = 2
-        elif trigger == "stop":
-            if self.state == 1:
+                self.offset = playAnimation(self.animation,deltaTime=0.01,percentage=mode if mode>0 else 100)
                 self.timeElapsed = time.time()-self.timestamp
-                stopAllMotors()
-                speak("You have used the stop button, please touch the estimated touch point by your finger.")
+                if mode == 0:
+                    perc = int(100*self.offset/len(self.animation[1]))
+                    speak("You have used the stop button at "+str(perc)+" percent, please touch the estimated touch point by your finger.")
+                else:
+                    speak("The movement of my arm has been stopped after "+str(mode)+" percent, please touch the estimated touch point by your finger.")
+                self.timestamp2 = time.time()
                 self.state = 2
-            else:
-                self.ready()
-        elif trigger == "touch":
-            record = False
+                space['touch'] = None
+        elif trigger == "touch" and space['touch'] is not None:
             if self.state == 2:
+                self.timeElapsed2 = time.time()-self.timestamp2
                 self.estimatedTouch = space['touch']
                 time.sleep(0.5)
-                # mode != -1 here
                 if space(default=False)['CompleteTouch']:
                     speak("Thank you. Let us look on my intention.")
-                    if self.leftArm:
-                        setLeftArm(self.pose,self.duration-self.timeElapsed)
-                    else:
-                        setRightArm(self.pose,self.duration-self.timeElapsed)
-                    self.state = 3
+                    playAnimation(self.animation,deltaTime=0.01,offset=self.offset)
+                    speak("This was my intention.")
                 else:
-                    self.intendedTouch = self.touch
                     speak("Thank you.")
                     record = True
-            elif self.state == 3:
-                self.intendedTouch = space['touch']
-                speak("This was my intention.")
-                record = True
-            else:
-                self.ready()
-            if record:
-                if self.leftArm:
-                    setLeftArm(pose0,self.duration)
-                else:
-                    setRightArm(pose0,self.duration)
-                time.sleep(self.duration+1.0)
                 name = space(default="+++")["name"]
                 try:
                     os.mkdir("data/")
@@ -373,10 +258,10 @@ class ExperimentAgent(Agent):
                     pass
                 with open("data/" + name + ".txt", "a") as f:
                     date = str(datetime.now())
-                    f.write(f"{date},{self.count},{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.intendedTouch[0]},{self.intendedTouch[1]},{self.timeElapsed:1.3f}\n")
+                    f.write(f"{date},{self.count},{self.lastmode},{self.headMode},{self.posename},{self.estimatedTouch[0]},{self.estimatedTouch[1]},{self.touch[0]},{self.touch[1]},{self.timeElapsed:1.3f},{self.timeElapsed2:1.3f}\n")
                 speak("Data are recorded.")
                 time.sleep(0.5)
-                self.ready()
+            self.ready()
         
 if __name__ == "__main__":
 
@@ -387,59 +272,13 @@ if __name__ == "__main__":
 
     from TouchAgent import TouchAgent
     TouchAgent()
-    stopAllMotors()
-    setRightArm(pose0)
-    
-    class SimpleExperimentAgent(Agent):
-
-        def init(self):
-            space.attach_trigger('touch',self,Trigger.NAMES)
-
-        def senseSelectAct(self):
-            if self.triggered() == 'touch':
-                print('save')
-                stopAllMotors()
-                time.sleep(0.5)
-                arm = getRightArm()
-                touch = space['touch']
-                goal = space['goal']
-                with open('record.txt','at') as f:
-                    f.write(str([goal]+list(touch)+list(arm))[1:-1]+'\n')
-    
-    #SimpleExperimentAgent()
-    #print('simple agent started')
-    
-    #time.sleep(2)
-    #touch('B3')
-    #globalTest()
-    #calibtouch('A1')
-    #globalCalib()
-
-"""    
-p = 'B3'
-x = ord(p[1])-ord('1')
-y = ord(p[0])-ord('A')
-pose = poses[y][x]
-touch = touches[y][x]
-clean()
-space['emulated'] = touch
-duration = 1.0
-setHead(pose[-2:],duration)
-time.sleep(duration)
-duration = 4.0
-setRightArm(pose[:-2],duration)
-time.sleep(0.8*duration)
-stopAllMotors()
-#
-duration = 2.0
-setRightArm(pose0[:-2],duration)
-setHead(pose0[-2:],duration)
-#
-"""    
-
-"""
-for touchline in touches:
-    for touch in touchline:
-        space['emulated'] = touch
+       
+    time.sleep(2)
+    space['ShowIntention'] = True
+    for point in touches:
+        space['emulated'] = point
         time.sleep(0.1)
-"""
+    
+    touch(1)
+    #globalTest()
+

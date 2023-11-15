@@ -16,10 +16,23 @@ def clean():
     image[:,:] = (80,80,80)
     space['touchimage'] = image
     
+def cross(scr,line_color,point,radius,thickness=1):
+    x, y = point
+    pygame.draw.line(scr,line_color, (x-radius, y), (x+radius, y), width=thickness)
+    pygame.draw.line(scr,line_color, (x, y-radius), (x, y+radius), width=thickness)
+
+def cv_cross(img,point,radius,color,thickness=1):
+    x, y = point
+    cv2.line(img,(int(x-radius),int(y)),(int(x+radius),int(y)),color,thickness)
+    cv2.line(img,(int(x),int(y-radius)),(int(x),int(y+radius)),color,thickness)
+
 class TouchAgent(Agent):
             
     def init(self):
         # create a Pygame window
+        pygame.font.init()
+        global myfont
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
         global screen
         screen = pygame.display.set_mode((2400, 1350), flags=pygame.NOFRAME, depth=0, display=1)
         global image
@@ -60,9 +73,12 @@ class TouchAgent(Agent):
                     circle_position = (int(width*event.x), int(height*event.y))
                     print("touch detected at",circle_position)
                     space['touch'] = circle_position
-                    pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
-                    pygame.display.flip()
-                    cv2.circle(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),cv2.FILLED)
+                    if not space(default=False)['hide']:
+                        #pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
+                        cross(screen, circle_color, circle_position, circle_radius, 3)
+                        pygame.display.flip()
+                    #cv2.circle(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),cv2.FILLED)
+                    cv_cross(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),7)
                     space['touchImage'] = image
                     #pyautogui.moveTo(mouse[0], mouse[1])
                     #for window in pyautogui.getAllWindows():  
@@ -75,8 +91,8 @@ class TouchAgent(Agent):
                     elif event.key ==  1073741920: # Numeric arrow up
                         print('run key pressed')
                         space['experiment'] = True
-                    else:
-                        print('key',event.key)
+                    #else:
+                    #    print('key',event.key)
                 #else:
                 #    mouse = pyautogui.position()
             pygame.display.flip()
@@ -89,9 +105,11 @@ class TouchAgent(Agent):
                 circle_radius = 30
                 circle_position = emulated
                 if space(default=False)['ShowIntention']:
-                    pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
+                    #pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
+                    cross(screen, circle_color, circle_position, circle_radius)
                     pygame.display.flip()
-                cv2.circle(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),cv2.FILLED)                
+                #cv2.circle(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),cv2.FILLED)                
+                cv_cross(image,circle_position,circle_radius,(circle_color[2],circle_color[1],circle_color[0]),7)
                 space['touchImage'] = image
                 space['emulated'] = None
             time.sleep(0.025)
@@ -128,9 +146,17 @@ if __name__ == "__main__":
     dx = dy
     tx = (pw-4*dx)/2
     counter = 1
-    for y in [ty,my,by]:
+    ids = [5,4,6,1,3,7,2]
+    i = 0
+    for y in [ph-ty,ph-my,ph-by]:
         for x in [tx,tx+dx,tx+2*dx,tx+3*dx,tx+4*dx]:
             if (counter % 2) == 0:
-                pygame.draw.circle(screen, (255,0,0), (x,y), 30)
+                print(ids[i],x,y)
+                #pygame.draw.circle(screen, (255,0,0), (x,y), 30)
+                cross(screen,(255,0,0),(x,y),radius=30,thickness=3)
+                text = myfont.render(str(ids[i]), False, (255, 0, 0))
+                screen.blit(text, (x+5,y))
+                i += 1
             counter +=1
 
+    pygame.display.flip()

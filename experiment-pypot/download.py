@@ -28,9 +28,13 @@ def download_and_unzip(path,url):
 def download_v4l2():
     download_and_unzip("v4l2-ctl.exe","https://www.agentspace.org/download/v4l2-ctl.zip")  
 
+def download_face():
+    download_and_unzip("face/labels.txt","https://www.agentspace.org/download/face.zip")  
+
 def download_all():
     download_robot_config()
     download_v4l2()
+    download_face()
 
 if __name__ == "__main__":
     download_all()

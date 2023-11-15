@@ -24,6 +24,8 @@ from TouchAgent import TouchAgent
 from CameraAgent import CameraAgent
 from RecorderAgent import RecorderAgent
 from SafetyAgent import SafetyAgent
+from FaceAgent import FaceAgent
+from ActionAgent import ActionAgent
 
 GuiAgent() # writes 'experiment', 'stop' reads 'humanImage', 'robotImage', 'robotEye', 'robotWideFOV'
 time.sleep(1)
@@ -37,8 +39,13 @@ CameraAgent('HD Pro Webcam C920',0,'robotImage',fps=10)
 time.sleep(1)
 CameraAgent('See3CAM_CU135',1,'robotEye',fps=10,zoom=350) # right eye
 time.sleep(1)
-CameraAgent('See3CAM_CU135',0,'robotWideFOV',fps=10,zoom=100) # left eye
+CameraAgent('See3CAM_CU135',0,'robotWideFOV',fps=10,zoom=170) # left eye
 time.sleep(1)
 RecorderAgent() # reads 'humanImage', 'robotImage', 'robotEye', 'touchImage'
 time.sleep(1)
 SafetyAgent()
+time.sleep(1)
+FaceAgent('robotWideFOV','face position','face','emotion','face point') # face detector
+time.sleep(1)
+ActionAgent('face point') # turn to shown objects
+time.sleep(1)

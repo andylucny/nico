@@ -168,9 +168,17 @@ def getTranslationX(affineTransform):
 
 def getTranslationY(affineTransform):
     return affineTransform[1,2]
-    
+
+#first = True    
 def image_shift_xy(left,right):
-    """    
+    """
+    global first
+    if first:
+        cv2.imwrite('left.png',left)
+        cv2.imwrite('right.png',right)
+        first = False
+    """
+    
     left_gray = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
     right_gray = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
     
@@ -179,13 +187,13 @@ def image_shift_xy(left,right):
     right_points, status, err = cv2.calcOpticalFlowPyrLK(left_gray, right_gray, left_points, None) 
 
     indices = np.where(status==1)[0]
-    warp_matrix, _ = cv2.estimateAffine2D(left_points[indices], right_points[indices], method=cv2.LMEDS)
-    """
+    warp_matrix, _ = cv2.estimateAffinePartial2D(left_points[indices], right_points[indices], method=cv2.LMEDS)
     
-    #left_crop = left[left.shape[0]//4:3*left.shape[0]//4,left.shape[1]//4:3*left.shape[1]//4]
-    #right_crop = right[right.shape[0]//4:3*right.shape[0]//4,right.shape[1]//4:3*right.shape[1]//4]
-    left_gray = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
-    right_gray = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)    
+    """
+    left_crop = left[left.shape[0]//4:3*left.shape[0]//4,left.shape[1]//4:3*left.shape[1]//4]
+    right_crop = right[right.shape[0]//4:3*right.shape[0]//4,right.shape[1]//4:3*right.shape[1]//4]
+    left_gray = cv2.cvtColor(left_crop, cv2.COLOR_BGR2GRAY)
+    right_gray = cv2.cvtColor(right_crop, cv2.COLOR_BGR2GRAY)    
     warp_matrix = np.array([[1,0,0],[0,1,0]],np.float32)
     try:
         # use ECC
@@ -197,9 +205,9 @@ def image_shift_xy(left,right):
     except Exception as ee:
         # print('ECC diverged:', ee)
         pass
-    
+    """
     dx = getTranslationX(warp_matrix)
     dy = getTranslationY(warp_matrix)
-    
+
     return (dx,dy)
     
