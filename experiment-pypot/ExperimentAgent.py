@@ -3,6 +3,7 @@ from nicomotion.Motion import Motion
 import numpy as np
 import time
 import os
+import random
 from TouchAgent import clean
 from speak import speak
 import pyautogui
@@ -12,6 +13,9 @@ motorConfig = './nico_humanoid_upper_rh7d_ukba.json'
 robot = Motion(motorConfig=motorConfig)
 
 animations_path = './final_position'
+animationsIncoherent_path = './final_positionIncoherent'#
+gaze_path = './final_gaze'#
+gazeIncoherent_path = './final_gazeIncoherent'#
 
 def close():
     space["stop"] = True
@@ -76,15 +80,51 @@ def loadAnimations(path):
     touches = np.loadtxt(path+'/touches.txt')
     touches = [ tuple(touch.astype(int)) for touch in touches ]
     animations = []
-    for i, _ in enumerate(touches):
+    for i, _ in enumerate(touches): 
         recorded_poses = []
-        filename = path+'/p'+str(i+1)+'.txt'
+        filename = path+'/p'+str(i)+'.txt'
         animation = loadAnimation(filename)
+        print('animation ', i, ' ', animation)
         animations.append(animation)
     home1 = loadAnimation(path+'/home1.txt')
     home2 = loadAnimation(path+'/home2.txt')
+    print('home2 ', home2)
+
 
 loadAnimations(path=animations_path)
+
+def loadAnimationsIncoherent(path):#
+    global touchesIncoherent, animationsIncoherent
+    touchesIncoherent = np.loadtxt(path+'/touchesIncoherent.txt')
+    touchesIncoherent = [ tuple(touch.astype(int)) for touch in touchesIncoherent ]
+    animationsIncoherent = []
+    for i, _ in enumerate(touchesIncoherent): 
+        recorded_poses = []
+        filenameIncoherent = path+'/Incoherent_p'+str(i)+'.txt'
+        animationIncoherent = loadAnimation(filenameIncoherent)
+        print('animation ', i, ' ', animationIncoherent)
+        animationsIncoherent.append(animationIncoherent)
+
+def loadAnimations_gaze(path):#
+    global animations_gaze, gaze_home
+    animations_gaze = []
+    for i, _ in enumerate(touches):
+        filename_gaze = path+'/gaze_p'+str(i)+'.txt'
+        animation_gaze = loadAnimation(filename_gaze)
+        animations_gaze.append(animation_gaze)
+    gaze_home = loadAnimation(path+'/gaze_home.txt')
+    print('gaze_home ', gaze_home)
+    
+loadAnimations_gaze(path=gaze_path)#
+
+def loadAnimations_gazeIncoherent(path):#
+    global animations_gazeIncoherent
+    animations_gazeIncoherent = []
+    for i, _ in enumerate(touchesIncoherent):
+        filename_gazeIncoherent = path+'/gazeIncoherent_p'+str(i)+'.txt'
+        animation_gazeIncoherent = loadAnimation(filename_gazeIncoherent)
+        animations_gazeIncoherent.append(animation_gazeIncoherent)
+    
 
 def playAnimation(animation,deltaTime=0.01,percentage=100,offset=0):
     concerned_dofs, recorded_poses = animation
@@ -101,7 +141,7 @@ def playAnimation(animation,deltaTime=0.01,percentage=100,offset=0):
             return i
     return len(recorded_poses)
 
-def playAnimationEnd(animation,speed=0.04):
+def playAnimationEnd(animation,speed=0.04*0.5):
     concerned_dofs, recorded_poses = animation
     pose = recorded_poses[-1]
     for dof, angle in zip(concerned_dofs,pose):
@@ -122,30 +162,56 @@ setDefaultPose()
 
 def touch(i,back=False): # i = 1 .. 7
     playAnimationEnd(home1)
-    time.sleep(3)
+    playAnimationEnd(gaze_home, speed=0.04) ####
+    time.sleep(5)
     playAnimationEnd(home2)
     time.sleep(1)
     playAnimation(animations[i-1])
     if back:
         time.sleep(1.5)
         playAnimationEnd(home1)
-        time.sleep(3)
+        playAnimationEnd(gaze_home, speed=0.04) ####
+        time.sleep(5)
 
 def globalTest():
     for i in range(7):
-        touch(i)
+        touch(i)   
 
+def composeCoherentIncoherent(animationsIncoherent_path, gazeIncoherent_path):#
+    global congruences, touches, animations_gaze, animations
+    loadAnimationsIncoherent(path=animationsIncoherent_path)
+    loadAnimations_gazeIncoherent(path=gazeIncoherent_path)
+    #animations.append(animationsIncoherent)
+    animations = animations + animationsIncoherent
+    print('animations ', animations, 'animationsIncoherent ', animationsIncoherent)
+    animations_gaze = animations_gaze + animations_gazeIncoherent
+    print('animations_gaze ', animations_gaze, 'animations_gazeIncoherent ', animations_gazeIncoherent)
+    
+    #animations_gaze.append(animations_gazeIncoherent)
+    print(touchesIncoherent)
+    congruences = [True]*len(touches)
+    touches = touches + touchesIncoherent
+    congruences += [False]*len(touchesIncoherent)
+    print('LEN touches:',len(touches),'congurences',len(congruences),'animgaze',len(animations_gaze))
+    #print('touches', touches)
+
+print('space head', space["head"])    
+composeCoherentIncoherent(animationsIncoherent_path, gazeIncoherent_path)#   
+
+  
 #touch(1)
 #globalTest()
 
 class ExperimentAgent(Agent):
 
     def ready(self):
+        print('ready')
         if self.stopped:
             return
         duration = self.duration if self.lastmode <= 0 else self.duration*self.lastmode/100.0
         duration *= 0.7 # speed up
-        playAnimationEnd(home1, speed = 0.06)
+        playAnimationEnd(home1, speed = 0.06*0.5)
+        playAnimationEnd(gaze_home, speed=0.04)
         speak('Preparing. Please, wait.')
         time.sleep(duration)
         if self.stopped:
@@ -167,6 +233,8 @@ class ExperimentAgent(Agent):
         if self.stopped:
             return
         print('Count:',self.count,'Max Count:',space(default=1)["MaxCount"])
+        #stimuliRandomization(touches, space["MaxCount"])
+        #print('touchesShuffled:', touchesShuffled)
         if self.count > 0 and self.count < space(default=1)["MaxCount"]:
             print("running automatically the next experiment")
             space["experiment"] = True
@@ -183,6 +251,8 @@ class ExperimentAgent(Agent):
         self.duration = 4.0
         self.lastmode = 0
         self.count = 0
+        self.countTrials = 0
+        self.countTrialsIndex = 0
         self.lastName = ""
         self.mouse = None
         self.ready()
@@ -191,10 +261,30 @@ class ExperimentAgent(Agent):
         space.attach_trigger("stop",self,Trigger.NAMES)
         
     def senseSelectAct(self):
+        global stimuliId
         trigger = self.triggered()
         mode = space(default=40)["StopMode"]
         self.duration = space(default=4)["Duration"]
         if trigger == "experiment":
+            print('senseSelectAct')
+            
+            if self.countTrialsIndex == 0:   
+                stimuliId = list(range(len(touches)))
+                random.shuffle(stimuliId)
+            print("STIMULI",self.countTrialsIndex, stimuliId)
+            while self.countTrialsIndex < len(touches):
+                self.sample_index = stimuliId[self.countTrialsIndex]
+                self.countTrialsIndex += 1
+                if space(default=True)["head"]:
+                    break
+                elif congruences[self.sample_index]:
+                    break
+            self.countTrials += 1
+            print("self.countTrials ", self.countTrials)
+            print("stimuliId =", stimuliId,"index =", self.sample_index,"congruent =",congruences[self.sample_index],"head =",space(default=True)["head"])
+            if self.countTrialsIndex == len(touches):
+                self.countTrialsIndex = 0
+                self.countTrials = 0
             if space(default=False)["experiment"]:
                 if self.state != 0:
                     self.ready()
@@ -208,23 +298,29 @@ class ExperimentAgent(Agent):
                 space["count"] = self.count
                 if space(default=False)['TellIstructions']:
                     speak("Starting experiment...")
-                playAnimationEnd(home2)
-                time.sleep(1)
-                if mode == 0:
-                    time.sleep(1)
-                    speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
-                self.sample_index = np.random.randint(len(touches))
-                self.posename = str(self.sample_index+1)
+                
+                #self.touches_shuffled = np.shuffle(touches)#
+                #self.sample_index = np.random.randint(len(touches))
+                #self.sample_index in self.touches_shuffled:#
+                self.posename = str(self.sample_index)    
                 print("SELECTED POINT No.",self.posename)
                 self.touch = touches[self.sample_index]
                 space['emulated'] = self.touch
                 self.headMode = space(default=True)['head']
                 if self.headMode:
-                    self.head = [0,-30]
+                    #self.head = [0,-30]
+                    gaze = animations_gaze[self.sample_index]
                 else:
-                    self.head = [0,0]
-                setHead(self.head)
+                    #self.head = [0,0]
+                    gaze = gaze_home
+                #setHead(self.head) 
+                playAnimationEnd(gaze, speed=0.04)
                 time.sleep(1)
+                playAnimationEnd(home2)
+                time.sleep(1)
+                if mode == 0:
+                    time.sleep(1)
+                    speak("Please, use button Enter to stop me when you are ready to guess the touch point.")
                 self.animation = animations[self.sample_index]
                 self.timestamp = time.time()
                 space["stop"] = False

@@ -35,8 +35,7 @@ class GuiAgent(Agent):
                 sg.Checkbox("Hide touch", default=False, key='Hide', enable_events=True),
                 sg.Text("Head:", size=(5, 1)), 
                 sg.Radio("off", "Head:", False, size=(2, 1), key="Head-off", enable_events=True), 
-                sg.Radio("congruent", "Head:", True, size=(8, 1), key="Head-congruent", enable_events=True), 
-                sg.Radio("disparate", "Head:", False, size=(8, 1), key="Head-disparate", enable_events=True), 
+                sg.Radio("gaze+pointing", "Head:", True, size=(8, 1), key="Head-congruent", enable_events=True), 
             ],
             [ 
                 sg.Text("Stop mode:", size=(9, 1)), 
@@ -97,13 +96,8 @@ class GuiAgent(Agent):
                 space["StopMode"] = percentage
             elif event == "Head-off":
                 space["head"] = False
-                space["disparate"] = False
             elif event == "Head-congruent":
                 space["head"] = True
-                space["disparate"] = False
-            elif event == "Head-disparate":
-                space["head"] = True
-                space["disparate"] = True
             elif event == "Run":
                 space["experiment"] = True
             elif event == "Stop":

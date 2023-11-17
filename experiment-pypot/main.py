@@ -45,7 +45,7 @@ RecorderAgent() # reads 'humanImage', 'robotImage', 'robotEye', 'touchImage'
 time.sleep(1)
 SafetyAgent()
 time.sleep(1)
-FaceAgent('robotWideFOV','face position','face','emotion','face point') # face detector
-time.sleep(1)
+#FaceAgent('robotWideFOV','face position','face','emotion','face point') # face detector
+#time.sleep(1)
 ActionAgent('face point') # turn to shown objects
 time.sleep(1)
