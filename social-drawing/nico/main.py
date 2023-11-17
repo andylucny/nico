@@ -9,6 +9,7 @@ from nico.ActionAgent import ActionAgent
 from nico.ControlAgent import ControlAgent
 from nico.ViewerAgent import ViewerAgent
 from nico.RandomAgent import RandomAgent
+from nico.RecorderAgent import RecorderAgent
 
 from nico.download import download_all
 download_all()
@@ -80,6 +81,12 @@ def startup():
     RandomAgent(robot)
     time.sleep(1)
     ViewerAgent('camera','wide camera','points','face point','point') # view image from camera
+    time.sleep(1)
+    CameraAgent('HD Pro Webcam C920',1,'humanImage',fps=10)
+    time.sleep(1)
+    CameraAgent('HD Pro Webcam C920',0,'robotImage',fps=10)
+    time.sleep(1)
+    RecorderAgent()
 
 def setmode(mode): # 0 .. look to the touchscreen, 1 .. look to face, 2 .. look around, 3 .. random look
     space['mode'] = mode
@@ -91,12 +98,19 @@ def setmode(mode): # 0 .. look to the touchscreen, 1 .. look to face, 2 .. look 
         space['point'] = None
         robot.setAngle("head_z",50.0,0.02)
         robot.setAngle("head_y",30.0,0.02)
-
+        
+def start_video(filename):
+    space['filename'] = filename
+    
+def stop_video():
+    start_video("")
+    
 if __name__ == "__main__":
 
     startup()
     print('looking on touchscreen')
     setmode(0)
+    start_video("a")
     time.sleep(20)
     print('looking on face')
     setmode(1)
@@ -104,4 +118,5 @@ if __name__ == "__main__":
     print('looking around')
     setmode(2)
     time.sleep(20)
+    stop_video()
     shutdown()
