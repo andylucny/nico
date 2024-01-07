@@ -46,9 +46,11 @@ for motor in _robot.motors:
 speed = 0.05
 angle = 90
 jointName = 'r_wrist_z'
+motor = getattr(_robot, jointName)
+motor.compliant = False
+motor.goal_speed = 1000.0 * speed
+motor.goal_position = angle
+
 for motor in _robot.motors:
-    motor = getattr(_robot, jointName)
     motor.compliant = False
-    motor.goal_speed = 1000.0 * speed
-    motor.goal_position = angle
 
