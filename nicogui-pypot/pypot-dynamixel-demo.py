@@ -1,4 +1,5 @@
 from pypot.dynamixel.io import DxlIO
+dxl_io = DxlIO('/dev/ttyUSB0')
 motor_IDs = dxl_io.scan()
 num_motors = len(motor_IDs)
 print("Found", num_motors, "motors with current angles",  dxl_io.get_present_position(motor_IDs))

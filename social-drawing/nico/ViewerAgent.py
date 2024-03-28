@@ -5,7 +5,9 @@ import time
 
 class ViewerAgent(Agent):
 
-    def __init__(self, nameImage, nameWideImage, namePoints, nameFacePoint, namePoint):
+    def __init__(self, nameSideImage1, nameSideImage2, nameImage, nameWideImage, namePoints, nameFacePoint, namePoint):
+        self.nameSideImage1 = nameSideImage1
+        self.nameSideImage2 = nameSideImage2
         self.nameImage = nameImage
         self.nameWideImage = nameWideImage
         self.namePoints = namePoints
@@ -14,20 +16,24 @@ class ViewerAgent(Agent):
         super().__init__()
 
     def init(self):
-        space.attach_trigger(self.nameImage,self)
+        space.attach_trigger(self.nameSideImage1,self)
             
     def senseSelectAct(self):
-        image = space[self.nameImage]
-        wideimage = space[self.nameWideImage]
-        if image is None:
+        image1 = space[self.nameSideImage1]
+        if image1 is None:
             return
+        blank = np.zeros_like(image1)
+        image2 = space(default=blank)[self.nameSideImage2]
+        image = space(default=blank)[self.nameImage]
+        wideimage = space(default=blank)[self.nameWideImage]
         image = np.copy(image)
         if wideimage is None:
             wideimage = np.copy(image)
         else:
             wideimage = np.copy(wideimage)
-        #image = cv.resize(image,(image.shape[1]//2,image.shape[0]//2))
-        wideimage = cv.resize(wideimage,(image.shape[1],image.shape[0]))
+        image2 = cv.resize(image2,(image1.shape[1],image1.shape[0]))
+        image = cv.resize(image,(image1.shape[1],image1.shape[0]))
+        wideimage = cv.resize(wideimage,(image1.shape[1],image1.shape[0]))
 
         current = space[self.namePoint]
         
@@ -44,8 +50,10 @@ class ViewerAgent(Agent):
             color = (0,0,255) if face == current else (0,255,0)
             pt = (int(face[0]*wideimage.shape[1]),int(face[1]*wideimage.shape[0]))
             cv.circle(wideimage,pt,10,color,cv.FILLED)
-        
-        cv.imshow("camera",cv.hconcat([image,wideimage]))
+ 
+        result = cv.vconcat([cv.hconcat([image1,image2]),cv.hconcat([image,wideimage])])
+        result = cv.resize(result,(image1.shape[1],image1.shape[0]))
+        cv.imshow("camera",result)
         key = cv.waitKey(1)
         if key == ord('s'):
             cv.imwrite('righteye'+str(time.time())+'.png',image)

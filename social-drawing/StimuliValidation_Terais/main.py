@@ -80,13 +80,13 @@ def startup():
     time.sleep(1)
     RandomAgent(robot)
     time.sleep(1)
-    #ViewerAgent('camera','wide camera','points','face point','point') # view image from camera
-    #time.sleep(1)
-    #CameraAgent('HD Pro Webcam C920',1,'humanImage',fps=10)
-    #time.sleep(1)
-    #CameraAgent('HD Pro Webcam C920',0,'robotImage',fps=10)
-    #time.sleep(1)
-    #RecorderAgent()
+    ViewerAgent('camera','wide camera','points','face point','point') # view image from camera
+    time.sleep(1)
+    CameraAgent('HD Pro Webcam C920',1,'humanImage',fps=10)
+    time.sleep(1)
+    CameraAgent('HD Pro Webcam C920',0,'robotImage',fps=10)
+    time.sleep(1)
+    RecorderAgent()
 
 def setmode(mode): # 0 .. look to the touchscreen, 1 .. look to face, 2 .. look around, 3 .. random look
     space['mode'] = mode

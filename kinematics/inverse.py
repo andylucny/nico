@@ -11,17 +11,17 @@ robot = Motion(motorConfig=motorConfig)
 rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y']
 for dof in rightArmDofs:
     robot.enableTorque(dof)
-    
-point = [ 0.3371747,  -0.25679694,  0.24113979]
-
-rad_angles = my_chain.inverse_kinematics(point)
 
 def deg(x):
     return 180.0*x/np.pi
 
 def rad(x):
     return np.pi*x/180.0
-    
+     
+point = [ 0.3371747,  -0.25679694,  0.24113979]
+
+rad_angles = my_chain.inverse_kinematics(point)
+   
 angles = [ deg(rad_angle) for rad_angle in rad_angles ]
 print(angles[1:5])
 
