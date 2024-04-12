@@ -20,8 +20,14 @@ signal.signal(signal.SIGINT, signal_handler)
 
 from MotionAgent import MotionAgent
 from TouchAgent import TouchAgent
+from StopperAgent import StopperAgent
+from SpeakerAgent import SpeakerAgent
 
 MotionAgent() 
 time.sleep(1)
 TouchAgent() 
+time.sleep(1)
+StopperAgent() 
+time.sleep(1)
+SpeakerAgent('text',language='en') 
 time.sleep(1)

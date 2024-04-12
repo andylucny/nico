@@ -1,12 +1,13 @@
 from nicomotion.Motion import Motion
 import time
 import numpy as np
+from agentspace import space
 
 motorConfig = './nico_humanoid_upper_rh7d_ukba.json'
 robot = Motion(motorConfig=motorConfig)
 
 def close():
-    global robot
+    global robot #?
     rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y','r_wrist_z','r_wrist_x','r_thumb_z','r_thumb_x','r_indexfinger_x','r_middlefingers_x']
     parking_position = [-8.0, -15.0, 16.0, 74.0, -24.0, 35.0, -71.0, -104.0, -180.0, -180.0, 3.0, 13.0]
     for dof, position in zip(rightArmDofs,parking_position):
@@ -26,6 +27,10 @@ def enableTorque(dofs):
 def disableTorque(dofs):
     for dof in dofs:
         robot.disableTorque(dof)
+
+def stopAllMotors(dofs):
+    for motor in robot._robot.motors:
+        motor.goal_position = motor.present_position
 
 def loadAnimation(filename):
     with open(filename, 'r') as f:
@@ -62,11 +67,14 @@ def move_to_position_through_time(target_positions, duration):
         )
 
 def play_movement(dofs,poses,durations):
+    space["stop"] = False
     for pose,duration in zip(poses,durations):
         # Move all joints in the subset to the postion
         command = {dof : angle for dof, angle in zip(dofs, pose) if dof != 'timestamp' }
         move_to_position_through_time(command, duration)
         time.sleep(duration)
+        if space(default=False)["stop"]:
+            break
 
 if __name__ == "__main__":
  
