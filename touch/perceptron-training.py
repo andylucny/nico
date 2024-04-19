@@ -16,7 +16,7 @@ out = Dense(10,activation='linear')(x)
 model = Model(inputs=inp, outputs=out)
 model.summary()
 
-model.compile(optimizer='adam', loss='mse', metrics=['mse', 'mae'])
+model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.MeanSquaredError(), metrics=[keras.metrics.MeanSquaredError()])
 
 model.fit(samples_inp, samples_out, batch_size=10, epochs=6000)
 
