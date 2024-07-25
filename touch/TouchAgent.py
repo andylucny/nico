@@ -52,6 +52,7 @@ class TouchAgent(Agent):
         width, height = screen_info.current_w, screen_info.current_h # 
         color_index = 0
         colors = [ (255,0,0), (0,255,0), (0,255,255), (80,80,255) ] # Red, Green, Cyan, Light Blue
+        draw_points()
         print('initialized')
         
         # Run the event loop
@@ -120,17 +121,8 @@ class TouchAgent(Agent):
 
     def senseSelectAct(self):
         pass
-    
-if __name__ == "__main__":
-   
-    import os
-    def quit():
-        os._exit(0)
 
-    TouchAgent()
-    
-    time.sleep(3)
-    
+def draw_points():
     h=26.5
     ho=5.5 #7.5
     ph=1350
@@ -160,3 +152,15 @@ if __name__ == "__main__":
             counter +=1
 
     pygame.display.flip()
+    
+if __name__ == "__main__":
+   
+    import os
+    def quit():
+        os._exit(0)
+
+    TouchAgent()
+    
+    time.sleep(3)
+    
+    draw_points()

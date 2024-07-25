@@ -5,7 +5,7 @@ from keras.layers import Dense
 from keras.models import Model
 import cv2
 
-ds = np.loadtxt('dataset.npy')
+ds = np.loadtxt('dataset_right_arm.npy')
 resolution = (2400, 1350)
 samples_inp = ds[:,-2:]/np.array([resolution])
 samples_out = ds[:,:-2]/180.0
@@ -18,7 +18,7 @@ model.summary()
 
 model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.MeanSquaredError(), metrics=[keras.metrics.MeanSquaredError()])
 
-model.fit(samples_inp, samples_out, batch_size=10, epochs=6000)
+model.fit(samples_inp, samples_out, batch_size=10, epochs=12)
 
 model.save('perceptron.h5')
 

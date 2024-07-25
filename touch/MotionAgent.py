@@ -10,12 +10,13 @@ parking_position = [-8.0, -15.0, 16.0, 74.0, -24.0, 35.0, -71.0, -104.0, -180.0,
 ready_position = [-8.0, 46.0, 13.0, 99.0, 44.0, 99.0, -70.0, 32.0, -180.0, 180.0, 510]
 steady_position = [13.0, 36.0, 25.0, 106.0, 66.0, -180.0, -70.0, 26.0, -180.0, 172.0, 800]
 resolution = (2400, 1350)
-model = load_model("perceptron.h5")
+model = load_model("right.h5") # "perceptron.h5"
 
 class MotionAgent(Agent):
             
     def init(self):
         enableTorque(rightArmDofs)
+        self.ind = 0
         space.attach_trigger("touch",self)
 
     def senseSelectAct(self):
@@ -71,6 +72,8 @@ class MotionAgent(Agent):
         print('durations'); pprint(durations)
         
         play_movement(rightArmDofs,poses,durations)
+        self.ind += 1
+        np.savetxt(f'touch-{self.ind}',touch_angles)
         print('moved')
         
         space["touch"] = (-1,-1)
