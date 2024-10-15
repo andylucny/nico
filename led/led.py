@@ -37,7 +37,7 @@ def send_custom_bitmap(side, bitmap):
         print(f'Invalid side: {side}')
         return
 
-    if (len(bitmap) != 8 and side in ['l', 'r']) or (len(bitmap) != 16 and side == 'm'):
+    if (len(bitmap) != 16 and side in ['l', 'r']) or (len(bitmap) != 32 and side == 'm'):
         print(f'Invalid bitmap length: {len(bitmap)}')
         return
     
@@ -51,7 +51,30 @@ send_preset("happiness")
 
 # Wait and send a custom bitmap for left eyebrow (turn all LEDs on)
 time.sleep(3)
-send_custom_bitmap('m', 'FFFFFFFFFFFFFFFF')
+
+send_custom_bitmap('m', 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
+"""
+21 41 ...
+22 42
+23 43
+24 44
+11 31
+12 32
+13 33
+14 34
+"""
+
+send_custom_bitmap('l', 'FFFFFFFFFFFFFFFF')
+"""
+... 31 11
+    32 12
+    33 13
+    34 14
+    41 21
+    42 22
+    43 23
+    44 24
+"""
 
 # Close the serial connection
 #ser.close()
