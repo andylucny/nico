@@ -60,7 +60,7 @@ for preset in presets:
     input()
     send_preset(preset)
 
-skap
+print('done')
 
 # Send a preset command
 send_preset("happiness")
@@ -93,15 +93,15 @@ send_custom_bitmap('l', 'FFFFFFFFFFFFFFFF')
     44 24
 """
 
-# Close the serial connection
-#ser.close()
-
-send_custom_bitmap('m', 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF') #better anger
+#send_custom_bitmap('m', 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF') # full mouth
 
 send_custom_bitmap('m', '00000078848484848484848484780000') # == send_preset('anger')
-send_custom_bitmap('m', '00000078848484444444848484780000')
+time.sleep(2)
 send_custom_bitmap('m', '00000078848444484848448484780000') # better anger
+time.sleep(2)
 
-send_preset('disgust')
-send_custom_bitmap('m', '000080C040202028282828485020C000')
+#send_preset('disgust')
+#send_custom_bitmap('m', '000080C040202028282828485020C000')
 
+# Close the serial connection
+ser.close()

@@ -1,0 +1,8 @@
+i3MK 2.5S
+
+prusa slicer 2.8.1
+
+PETG
+25%
+support
+brim
