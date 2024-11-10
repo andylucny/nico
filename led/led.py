@@ -45,6 +45,22 @@ def send_custom_bitmap(side, bitmap):
     ser.write(command.encode('utf-8'))  # Send the custom bitmap command
     print(f'Sent custom bitmap: {command}')
 
+presets = (
+    "happiness",
+    "sadness",
+    "anger",
+    "disgust",
+    "surprise",
+    "fear",
+    "neutral",
+    "clear"
+)
+for preset in presets:
+    print("press enter ...")
+    input()
+    send_preset(preset)
+
+skap
 
 # Send a preset command
 send_preset("happiness")
@@ -53,6 +69,7 @@ send_preset("happiness")
 time.sleep(3)
 
 send_custom_bitmap('m', 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
+# 64mm x 32mm, hole 3m 8x16
 """
 21 41 ...
 22 42
@@ -78,3 +95,13 @@ send_custom_bitmap('l', 'FFFFFFFFFFFFFFFF')
 
 # Close the serial connection
 #ser.close()
+
+send_custom_bitmap('m', 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF') #better anger
+
+send_custom_bitmap('m', '00000078848484848484848484780000') # == send_preset('anger')
+send_custom_bitmap('m', '00000078848484444444848484780000')
+send_custom_bitmap('m', '00000078848444484848448484780000') # better anger
+
+send_preset('disgust')
+send_custom_bitmap('m', '000080C040202028282828485020C000')
+
