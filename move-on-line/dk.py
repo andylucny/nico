@@ -49,27 +49,51 @@ def Ts(thetas):
         Txyz(3,0,9.5), Rx(-90), Rz(-thetas[2]), # -> 'r_arm_x'
         Txyz(17.5,0,0), Rx(90), Rz(180), Rz(-thetas[3]), # -> 'r_elbow_y'
         Txyz(10,0,0), Ry(90), Rz(-thetas[4]/2.0), # -> 'r_wrist_z'
-        Txyz(0,0,10), Rx(-90), Rz(-90), Rz(thetas[5]/4.5), # -> 'r_wrist_x'
-        Txyz(0,0,2), Txyz(10,0,0), Txyz(0,-2.5,0), Ry(90), Rz(90)
+        Txyz(0,0,10), Rx(-90), Rz(-90), Rz(thetas[5]/4.5+10), # -> 'r_wrist_x'
+        Txyz(0,-1,0), Txyz(6,0,0), Rz(20+(thetas[6]+180)/4.5), Txyz(6,0,0), Ry(90) # -> 'r_indexfinger_x'
     ]
+
+description = \
+    "Txyz(0,5,19.5), Rz(90), Rz(thetas[0]), " \
+    "Txyz(0,-1.5,2.5), Ry(90), Rz(thetas[1]), " \
+    "Txyz(3,0,9.5), Rx(-90), Rz(-thetas[2]), " \
+    "Txyz(17.5,0,0), Rx(90), Rz(180), Rz(-thetas[3]), " \
+    "Txyz(10,0,0), Ry(90), Rz(-thetas[4]/2.0), " \
+    "Txyz(0,0,10), Rx(-90), Rz(-90), Rz(thetas[5]/4.5), " \
+    "Txyz(0,-1,0), Txyz(6,0,0), Rz(20+(thetas[6]+180)/4.5), Txyz(6,0,0), Ry(90)"
+descriptions = description.split(', ')
 
 def dk(thetas):
     point0 = np.array([[0,0,0,1]]).T
+    vector0 = np.array([[0,0,1]]).T
     e = np.eye(4)
     points = [ point0.T[0][:3] ]
+    vectors = [ vector0 ]
     re = e
     for T in Ts(thetas):
         re = re @ T
         points.append( (re @ point0).T[0][:3] )
+        vectors.append( (re[:3,:3] @ vector0).T[0] )
 
-    return points
+    return points, vectors
     
 if __name__ == '__main__':
         
-    carlo_matilde = [-25.0, 83.0, 47.0, 94.0, -59.0, 114.0]
-    points0 = dk(carlo_matilde)
-    print(points0[-1]) # [-6.53  31.56  50.163]
+    #carlo_matilde = [-25.0, 83.0, 47.0, 94.0, -59.0, 114.0, 45.67]
+    #points0 = dk(carlo_matilde)
+    #print(points0[-1]) # [-6.53  31.56  50.163]
 
-    touch_one = [30.0, 40.0, 20.0, 131.0, 161.0, 146.0, 0, -29]
-    points1 = dk(touch_one)
-    print(points1[-1]) # [-45.294   2.582   4.05 ]
+    #touch_one = [33.01, 40.22, 26.07, 133.93, 109.58, 100.09, -166.81]
+    #points1 = dk(touch_one)
+    #print(points1[-1]) # [-45.294   2.582   4.05 ]
+
+    park_pose = [0.0, 0.0, 0.0, 89.0, 0.0, -56.0, -180.0]
+    
+    def test(pose):
+        points, vectors = dk(pose)
+        print(points[0], vectors[0])
+        for point, vector, descr in zip(points[1:], vectors[1:], descriptions):
+            print(descr,'->',point, vector)
+
+    test([0.0, 0.0, 0.0, 89.0, 0.0, -56.0, -180.0])
+    
