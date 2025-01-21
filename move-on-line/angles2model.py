@@ -18,7 +18,7 @@ def closest_fraction_on_line(A, B, C):
 
 ind = 1
 postures = []
-with open(f'{ind}.txt','r') as f:
+with open(f'{ind}{ind}.txt','r') as f:
     for line in f.readlines()[1:]:
         posture = eval(line)
         postures.append(posture)
@@ -50,9 +50,9 @@ for index in range(7):
     inp = Input(shape=(1,))
     #outs = []
     #for _ in range(6):
-    x = Dense(50,activation='ReLU')(inp) 
+    x = Dense(100,activation='ReLU')(inp) 
     #x = Dropout(0.1)(x)
-    x = Dense(50,activation='ReLU')(x) 
+    x = Dense(100,activation='ReLU')(x) 
     #x = Dropout(0.1)(x)
     out = Dense(1,activation='linear')(x)
     #    outs.append(out)
@@ -75,7 +75,7 @@ for index in range(7):
         samples_inp, 
         samples_out, 
         validation_data=(samples_inp, samples_out),
-        batch_size=5, 
+        batch_size=len(postures), 
         epochs=500, 
         #callbacks=[reduce_lr] 
     )
@@ -103,5 +103,5 @@ model.summary()
 
 model.compile(optimizer=keras.optimizers.Adam(), loss=keras.losses.MeanSquaredError(), metrics=[keras.metrics.MeanSquaredError()])
 
-model.save(f'{ind}.h5')
+model.save(f'{ind}{ind}.h5')
 print('\7')
