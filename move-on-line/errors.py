@@ -1,9 +1,10 @@
 import numpy as np
 
-ind = 1
+ind = 3
 
 postures = []
-with open(f'blending/blended{ind}.txt','r') as f:
+#with open(f'blending/blended{ind}.txt','r') as f:
+with open(f'ik1/generated{ind}.txt','r') as f:
     lines = f.readlines()
     dofs = eval(lines[0])
     for line in lines[1:]:

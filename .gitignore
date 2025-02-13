@@ -6,3 +6,6 @@
 *.prototxt
 *.zip
 *.avi
+*.3mf
+*.gcode
+

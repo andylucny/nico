@@ -13,14 +13,17 @@ resolution = (2400, 1350)
 model = load_model("right.h5") # "perceptron.h5"
 
 class MotionAgent(Agent):
+
+    def __init__(self, touchname):
+        self.touchname = touchname
             
     def init(self):
         enableTorque(rightArmDofs)
         self.ind = 0
-        space.attach_trigger("touch",self)
+        space.attach_trigger(self.touchname,self)
 
     def senseSelectAct(self):
-        point = space["touch"]
+        point = space[self.touchname]
         if point is None:
             return
         if point[0] < 0 or point[1] < 0:
@@ -76,5 +79,5 @@ class MotionAgent(Agent):
         np.savetxt(f'touch-{self.ind}',touch_angles)
         print('moved')
         
-        space["touch"] = (-1,-1)
+        space[self.touchname] = (-1,-1)
         time.sleep(1.0)

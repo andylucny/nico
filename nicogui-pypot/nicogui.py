@@ -537,9 +537,9 @@ try:
         if right_view is not None and concerned['RightCross']:
             right_view = np.copy(right_frame)
             cross(right_view) 
-        if dxy is not None:
-            crossAddons(left_view,dxy,-1)
-            crossAddons(right_view,dxy,+1)
+        #if dxy is not None:
+        #    crossAddons(left_view,dxy,-1)
+        #    crossAddons(right_view,dxy,+1)
         if left_frame is not None and left_fps > 1: 
             left_imgbytes = cv2.imencode(".png", cv2.resize(left_view,(320,240)))[1].tobytes()
             window["Left-EYE"].update(data=left_imgbytes)

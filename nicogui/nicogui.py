@@ -219,7 +219,6 @@ while True:
                 if torque:
                     ks = synchronized(k)
                     if synchro == 0 or synchro == 1 or ks == k:
-                        print('set',k,'to',values[k])
                         if degrees:
                             motors.setPositionDg(k,int(values[k]))
                         else:

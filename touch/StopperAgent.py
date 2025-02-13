@@ -16,4 +16,5 @@ class StopperAgent(Agent):
             return
 
         space["stop"] = True
-        stopAllMotors()
+        rightArmDofs = ['r_shoulder_z','r_shoulder_y','r_arm_x','r_elbow_y','r_wrist_z','r_wrist_x','r_thumb_z','r_thumb_x','r_indexfinger_x','r_middlefingers_x']
+        stopAllMotors(rightArmDofs)
