@@ -50,8 +50,18 @@ def Ts(thetas):
         Txyz(17.5,0,0), Rx(90), Rz(180), Rz(-thetas[3]), # -> 'r_elbow_y'
         Txyz(10,0,0), Ry(90), Rz(-thetas[4]/2.0), # -> 'r_wrist_z'
         Txyz(0,0,10), Rx(-90), Rz(-90), Rz(thetas[5]/4.5+10), # -> 'r_wrist_x'
-        Txyz(0,-1,0), Txyz(6,0,0), Rz(20+(thetas[6]+180)/4.5), Txyz(6,0,0), Ry(90) # -> 'r_indexfinger_x'
+        Txyz(0,-1,0), Txyz(6,0,0), Rz(20+(thetas[6]+180)/4.5), Txyz(6,0,0) #, Ry(90) # -> 'r_indexfinger_x'
     ]
+
+labels = {
+    3 : 'r_shoulder_z',
+    6 : 'r_shoulder_y',
+    9 : 'r_arm_x',
+    13: 'r_elbow_y',
+    16: 'r_wrist_z',
+    20: 'r_wrist_x',
+    24: 'r_indexfinger_x',
+}
 
 description = \
     "Txyz(0,5,19.5), Rz(90), Rz(thetas[0]), " \
@@ -60,12 +70,12 @@ description = \
     "Txyz(17.5,0,0), Rx(90), Rz(180), Rz(-thetas[3]), " \
     "Txyz(10,0,0), Ry(90), Rz(-thetas[4]/2.0), " \
     "Txyz(0,0,10), Rx(-90), Rz(-90), Rz(thetas[5]/4.5), " \
-    "Txyz(0,-1,0), Txyz(6,0,0), Rz(20+(thetas[6]+180)/4.5), Txyz(6,0,0), Ry(90)"
+    "Txyz(0,-1,0), Txyz(6,0,0), Rz(20+(thetas[6]+180)/4.5), Txyz(6,0,0)" #, Ry(90)
 descriptions = description.split(', ')
 
 def dk(thetas):
     point0 = np.array([[0,0,0,1]]).T
-    vector0 = np.array([[0,0,1]]).T
+    vector0 = np.array([[0,0,1]])
     e = np.eye(4)
     points = [ point0.T[0][:3] ]
     vectors = [ vector0 ]
@@ -73,7 +83,7 @@ def dk(thetas):
     for T in Ts(thetas):
         re = re @ T
         points.append( (re @ point0).T[0][:3] )
-        vectors.append( (re[:3,:3] @ vector0).T[0] )
+        vectors.append( (re[:3,:3] @ vector0.T).T[0] )
 
     return points, vectors
     

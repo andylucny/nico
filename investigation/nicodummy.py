@@ -83,7 +83,8 @@ class DummyRobot():
         return self.joints[dof]
         
     def physicalSetAngle(self, dof, angle):
-        self.joints[dof] = angle
+        low, up = self.ranges[dof]
+        self.joints[dof] = max(low,min(angle,up))
         self.simulator.set(dof, angle)
 
     def setAngle(self, dof, angle, speed):

@@ -2,7 +2,7 @@ import time
 import sys
 import numpy as np
 from pprint import pprint
-from nicomover import enableTorque, play_movement, blind_play_movement, todicts, move_to_posture, park, half_duplex
+from nicomover import enableTorque, play_movement, blind_play_movement, todicts, move_to_posture, park, half_duplex, current_posture
 from dk import dk
 
 right_arm_dofs = ['r_shoulder_z', 'r_shoulder_y', 'r_arm_x', 'r_elbow_y', 'r_wrist_z', 'r_wrist_x', 'r_indexfinger_x']
@@ -211,7 +211,8 @@ if __name__ == '__main__':
     id = int(sys.argv[1])
     play_movement(todicts(right_arm_dofs,[start_points[id]]),[duration]) # preco parkuje?
     time.sleep(1)
-    points, vectors = dk(start_points[id])
+    posture = current_posture(right_arm_dofs)
+    points, vectors = dk(list(posture.values()))
     pprint(np.array(points))
     #print(id, points[-1])
     
