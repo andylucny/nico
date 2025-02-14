@@ -32,7 +32,7 @@ def blend(postures1,postures2):
 
 enableTorque(head_dofs)
 
-for ind in [1,7]: 
+for ind in [1,2,3,7]: 
 
     head_posture = head_postures[ind-1]
 

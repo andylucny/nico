@@ -1,7 +1,6 @@
 import time
 import os
 import numpy as np
-import copy
 try:
     from nicorobot import NicoRobot
     import requests
