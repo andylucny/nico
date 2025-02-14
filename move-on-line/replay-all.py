@@ -32,13 +32,13 @@ def blend(postures1,postures2):
 
 enableTorque(head_dofs)
 
-for ind in [1,2,3,4,5,6,7]: 
+for ind in [1,7]: 
 
     head_posture = head_postures[ind-1]
 
     postures = []
-    with open(f'blending/blended{ind}.txt','r') as f:
-    #with open(f'ik1/generated{ind}.txt','r') as f:
+    #with open(f'blending/blended{ind}.txt','r') as f:
+    with open(f'ik1/generated{ind}.txt','r') as f:
     #with open(f'blending/generated{ind}.txt','r') as f:
         lines = f.readlines()
         dofs = eval(lines[0])
