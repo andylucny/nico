@@ -13,6 +13,11 @@ def clear():
     except:
         pass
     color_index = 0
+    
+def draw(text,point):
+    text_surface = myfont.render(text, True, (255, 255, 255))
+    screen.blit(text_surface, point)
+    pygame.display.flip()
 
 class TouchAgent(Agent):
             
@@ -57,17 +62,17 @@ class TouchAgent(Agent):
                         color_index = 0
                     circle_radius = 3
                     circle_position = (int(width*event.x), int(height*event.y))
-                    #print("touch detected at",circle_position)
+                    space['touch'] = (event.x, event.y)
+                    print("touch detected at",circle_position)
                     pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
                     pygame.display.flip()
-                    space['touch'] = (event.x, event.y)
                 elif event.type == pygame.FINGERMOTION:
                     circle_radius = 3
                     circle_position = (int(width*event.x), int(height*event.y))
-                    #print("touch detected at",circle_position)
+                    space['touch'] = (event.x, event.y)
+                    print("touch detected at",circle_position)
                     pygame.draw.circle(screen, circle_color, circle_position, circle_radius)
                     pygame.display.flip()                  
-                    space['touch'] = (event.x, event.y)
                 elif event.type == pygame.FINGERUP:
                     pass
                 #elif event.type == pygame.KEYDOWN:
